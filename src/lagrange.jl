@@ -1,5 +1,20 @@
 # This file is a part of JuliaFEM.
-# License is MIT: see https://github.com/JuliaFEM/JuliaFEM.jl/blob/master/LICENSE.md
+# License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
+
+code = create_lagrange_basis(
+    :Quad4,
+    "4 node linear quadrangle element",
+    "1 + u + v + u*v",
+    (
+     (-1.0, -1.0),
+     ( 1.0, -1.0),
+     ( 1.0,  1.0),
+     (-1.0,  1.0)
+    )
+   )
+eval(code)
+
+#=
 
 global const ELEMENT_DESCRIPTIONS = Dict(
     "Poi1" => "1 node discrete point element",
@@ -632,3 +647,4 @@ function get_reference_coordinates{E}(element::Element{E})
     get_reference_coordinates(E)
 end
 
+=#
