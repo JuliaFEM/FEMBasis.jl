@@ -3,7 +3,7 @@
 
 # Kaltenbacher, Manfred. Numerical simulation of mechatronic sensors and actuators: finite elements for computational multiphysics. Springer, 2015.
 code = create_basis(
-    :Pyr5,
+    :Pyr5A,
     "5 node linear pyramid element",
     (
      ( 1.0,  1.0, 0.0), # N1
@@ -24,7 +24,7 @@ eval(code)
 
 # source: Code Aster documentation?
 code = create_basis(
-    :Pyr5CA,
+    :Pyr5,
     "5 node linear pyramid element",
     (
      (-1.0, -1.0, -1.0), # N1
