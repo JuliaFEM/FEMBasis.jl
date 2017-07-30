@@ -16,7 +16,7 @@ export Tet4, Tet10
 include("lagrange_hexahedrons.jl")
 export Hex8, Hex20, Hex27
 include("lagrange_wedges.jl")
-export Wedge6
+export Wedge6, Wedge15
 include("lagrange_pyramids.jl")
-export Pyr5, Pyr5CA
+export Pyr5
 end
