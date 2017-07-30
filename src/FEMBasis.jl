@@ -2,7 +2,7 @@
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
 module FEMBasis
-using Logging
+#using Logging
 include("create_lagrange_basis.jl")
 export get_reference_element_coordinates, eval_basis!, eval_dbasis!
 include("lagrange_segments.jl")
@@ -18,5 +18,5 @@ export Hex8, Hex20, Hex27
 include("lagrange_wedges.jl")
 export Wedge6
 include("lagrange_pyramids.jl")
-# export Pyr5
+export Pyr5, Pyr5CA
 end

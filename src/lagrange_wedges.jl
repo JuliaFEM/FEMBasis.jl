@@ -1,10 +1,10 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-code = create_lagrange_basis(
+# Kaltenbacher, Manfred. Numerical simulation of mechatronic sensors and actuators: finite elements for computational multiphysics. Springer, 2015.
+code = create_basis(
     :Wedge6,
     "6 node linear prismatic/wedge element",
-    "1 + u + v + w + u*w + v*w",
     (
      (0.0, 0.0, -1.0), # N1
      (1.0, 0.0, -1.0), # N2
@@ -12,11 +12,19 @@ code = create_lagrange_basis(
      (0.0, 0.0,  1.0), # N4
      (1.0, 0.0,  1.0), # N5
      (0.0, 1.0,  1.0), # N6
-    )
+    ),
+    (
+     "1/2 * (1-w) * (1-u-v)", # N1
+     "1/2 * (1-w) * u", # N2
+     "1/2 * (1-w) * v", # N3
+     "1/2 * (1+w) * (1-u-v)", # N4
+     "1/2 * (1+w) * u", # N5
+     "1/2 * (1+w) * v", # N6
+    ),
    )
-println(code)
 eval(code)
 
+#=
 code = create_lagrange_basis(
     :Wedge15,
     "15 node quadratic prismatic/wedge element",
@@ -40,3 +48,4 @@ code = create_lagrange_basis(
     )
    )
 #eval(code)
+=#

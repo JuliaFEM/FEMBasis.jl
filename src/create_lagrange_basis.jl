@@ -34,10 +34,8 @@ julia> calculate_basis_coefficient(p, X)
 """
 function calculate_basis_coefficients(p::Expr, X::Tuple)
     pargs = p.args[2:end]
-    debug("Polynomial: $pargs")
     dim = get_dim(p)
     nbasis = length(X)
-    debug("dim = $dim, nbasis = $nbasis")
     sandbox = Module(:__SANDBOX__)
     vars = (:u, :v, :w)
 
@@ -47,18 +45,11 @@ function calculate_basis_coefficients(p::Expr, X::Tuple)
         for j=1:nbasis
             for (k,c) in enumerate(X[j])
                 code = :( $(vars[k]) = $c )
-                debug("evaluate code $code")
                 eval(sandbox, code)
             end
-            #eval(sandbox, parse("u, v, w = (0.0, 0.0, 0.0)"))
-            # u, v = coordinates[j]
-            term = pargs[i]
-            debug("evaluate term $term in sandbox")
-            A[j,i] = eval(sandbox, term)
+            A[j,i] = eval(sandbox, pargs[i])
         end
     end
-    debug("A ready: ")
-    debug(A)
     return A 
 end
 
@@ -69,86 +60,58 @@ function calculate_interpolation_polynomials(p::Expr, A::Matrix)
     dim = get_dim(p)
     nbasis = size(A, 1)
     invA = inv(A)
-    # evaluate polynomials
-    equations = String[]
+    equations = Expr[]
     for j=1:nbasis
-        terms = String[]
+        equation = Expr(:call, :+)
         for i=1:nbasis
             isapprox(invA[i,j], 0.0) && continue
             if typeof(pargs[i]) <: Int && pargs[i] == 1
-                push!(terms, "$(invA[i,j])")
+                push!(equation.args, invA[i,j])
             else
-                push!(terms, "$(invA[i,j]) * $(pargs[i])")
+                if isapprox(invA[i,j], 1.0)
+                    push!(equation.args, :($(pargs[i])))
+                elseif isapprox(invA[i,j], -1.0)
+                    push!(equation.args, :(-$(pargs[i])))
+                else
+                    push!(equation.args, :($(invA[i,j]) * $(pargs[i])))
+                end
             end
         end
-        eq = "N[$j] = " * join(terms, " + ")
-        eq = replace(eq, " + -", " - ")
-        push!(equations, eq)
+        push!(equations, equation)
     end
-    debug(join(equations, "\n"))
     return equations
 end
 
 """
 Calculate derivatives of basis functions with respect to parameters u, v, w.
 """
-function calculate_interpolation_polynomial_derivatives(p::Expr, A::Matrix)
-    pargs = p.args[2:end]
-    dim = get_dim(p)
-    nbasis = size(A, 1)
-    invA = inv(A)
-    # evaluate polynomials
-    equations = String[]
+function calculate_interpolation_polynomial_derivatives(basis::Vector, dim::Int)
+    equations = Vector[]
     vars = [:u, :v, :w]
+    nbasis = length(basis)
     for j=1:nbasis
+        deq = []
         for k=1:dim
-            terms = String[]
-            for i=1:nbasis
-                isapprox(invA[i,j], 0.0) && continue
-                dterm = differentiate(pargs[i], vars[k])
-                if typeof(dterm) <: Int
-                    if dterm == 0
-                        continue
-                    end
-                    if dterm == 1
-                        push!(terms, "$(invA[i,j])")
-                    end
-                else
-                    push!(terms, "$(invA[i,j]) * $dterm")
-                end
-            end
-            if length(terms) == 0
-                push!(terms, "0.0")
-            end
-            eq = "dN[$k,$j] = " * join(terms, " + ")
-            #eq = replace(eq, "1.0 * 1 ", "1.0 ")
-            #eq = replace(eq, " + -", " - ")
-            push!(equations, eq)
+            #println("∂($(basis[j])) / ∂$(vars[k])")
+            der = differentiate(basis[j], vars[k])
+            push!(deq, der)
         end
+        push!(equations, deq)
     end
-    debug(join(equations, "\n"))
     return equations
 end
 
-function create_lagrange_basis(name::Symbol, description::String, ps::String, X::Tuple)
-
-    p = parse(ps)
-    dim = get_dim(p)
-    nbasis = length(X)
-    A = calculate_basis_coefficients(p, X)
-    N = calculate_interpolation_polynomials(p, A)
-    dN = calculate_interpolation_polynomial_derivatives(p, A)
+function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis::Vector, dbasis::Vector)
 
     Q = Expr(:block)
     for i=1:nbasis
-        push!(Q.args, parse(N[i]))
+        push!(Q.args, :(N[$i] = $(basis[i])))
     end
 
-    dN = reshape(dN, dim, nbasis)
     V = Expr(:block)
     for i=1:nbasis
         for k=1:dim
-            push!(V.args, parse(dN[k, i]))
+            push!(V.args, :(dN[$k,$i] = $(dbasis[i][k])))
         end
     end
 
@@ -199,4 +162,21 @@ function create_lagrange_basis(name::Symbol, description::String, ps::String, X:
     end
 
     return code
+end
+
+function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, p::Expr)
+    A = calculate_basis_coefficients(p, X)
+    basis = calculate_interpolation_polynomials(p, A)
+    dbasis = calculate_interpolation_polynomial_derivatives(basis, dim)
+    return create_basis(name, description, X, basis, dbasis)
+end
+
+function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, p::String)
+    create_basis(name, description, X, parse(p))
+end
+
+function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis_::NTuple{nbasis, String})
+    basis = [parse(b) for b in basis_]
+    dbasis = calculate_interpolation_polynomial_derivatives(basis, dim)
+    return create_basis(name, description, X, basis, dbasis)
 end
