@@ -8,6 +8,7 @@ abstract type AbstractBasis end
 
 include("create_basis.jl")
 export get_reference_element_coordinates, eval_basis!, eval_dbasis!
+
 include("lagrange_segments.jl")
 export Seg2, Seg3
 include("lagrange_quadrangles.jl")
@@ -22,4 +23,13 @@ include("lagrange_wedges.jl")
 export Wedge6, Wedge15
 include("lagrange_pyramids.jl")
 export Pyr5
+
+include("nurbs.jl")
+include("nurbs_segment.jl")
+export NSeg
+include("nurbs_surface.jl")
+export NSurf
+include("nurbs_solid.jl")
+export NSolid
+
 end
