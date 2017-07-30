@@ -26,7 +26,7 @@ end
     @testset "Tetrahedrons" begin test_elements(:Tet4, :Tet10) end
     @testset "Hexahedrons" begin test_elements(:Hex8, :Hex20, :Hex27) end
     @testset "Wedges" begin test_elements(:Wedge6, :Wedge15) end
+    @testset "Pyramids" begin test_elements(:Pyr5, ) end
     # fixme: partition of unity is not satisfied
-    #@testset "Pyramids" begin test_elements(:Pyr5, ) end
-    @testset "Pyramids" begin test_elements(:Pyr5CA, ) end
+    #@testset "Pyramids" begin test_elements(:Pyr5A, ) end
 end
