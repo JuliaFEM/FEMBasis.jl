@@ -3,6 +3,9 @@
 
 module FEMBasis
 #using Logging
+
+abstract type AbstractBasis end
+
 include("create_basis.jl")
 export get_reference_element_coordinates, eval_basis!, eval_dbasis!
 include("lagrange_segments.jl")

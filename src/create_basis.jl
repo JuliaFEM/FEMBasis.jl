@@ -128,7 +128,7 @@ function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{n
     end
 
     code = quote
-        type $name
+        type $name <: FEMBasis.AbstractBasis
         end
 
         function Base.size(::Type{$name})
