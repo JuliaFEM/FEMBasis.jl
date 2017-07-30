@@ -24,11 +24,10 @@ code = create_basis(
    )
 eval(code)
 
-#=
-code = create_lagrange_basis(
+# Basis functions are from ABAQUS theory manual
+code = create_basis(
     :Wedge15,
     "15 node quadratic prismatic/wedge element",
-    "1 + u + v + u^2 + u*v + v^2 + w + w*u + w*v + w*u^2 + w*u*v + w*v^2",
     (
      (0.0, 0.0, -1.0), # N1
      (1.0, 0.0, -1.0), # N2
@@ -45,7 +44,23 @@ code = create_lagrange_basis(
      (0.0, 0.0,  0.0), # N13
      (1.0, 0.0,  0.0), # N14
      (0.0, 1.0,  0.0), # N15
-    )
+    ),
+    (
+     "u^2*w^2 - u^2*w + 2*u*v*w^2 - 2*u*v*w - 3*u*w^2/2 + 3*u*w/2 + v^2*w^2 - v^2*w - 3*v*w^2/2 + 3*v*w/2 + w^2/2 - w/2",
+     "u^2*w^2 - u^2*w - u*w^2/2 + u*w/2",
+     "v^2*w^2 - v^2*w - v*w^2/2 + v*w/2",
+     "u^2*w^2 + u^2*w + 2*u*v*w^2 + 2*u*v*w - 3*u*w^2/2 - 3*u*w/2 + v^2*w^2 + v^2*w - 3*v*w^2/2 - 3*v*w/2 + w^2/2 + w/2",
+     "u^2*w^2 + u^2*w - u*w^2/2 - u*w/2",
+     "v^2*w^2 + v^2*w - v*w^2/2 - v*w/2",
+     "-2*u^2*w^2 + 2*u^2*w - 2*u*v*w^2 + 2*u*v*w + 2*u*w^2 - 2*u*w",
+     "2*u*v*w^2 - 2*u*v*w",
+     "-2*u*v*w^2 + 2*u*v*w - 2*v^2*w^2 + 2*v^2*w + 2*v*w^2 - 2*v*w",
+     "2*u^2*w^2 - 2*u^2*w - 4*u^2 + 2*u*v*w^2 - 2*u*v*w - 4*u*v - 2*u*w^2 + 2*u*w + 4*u",
+     "-2*u*v*w^2 + 2*u*v*w + 4*u*v",
+     "2*u*v*w^2 - 2*u*v*w - 4*u*v + 2*v^2*w^2 - 2*v^2*w - 4*v^2 - 2*v*w^2 + 2*v*w + 4*v",
+     "-2*u^2*w^2 + 2*u^2 - 4*u*v*w^2 + 4*u*v + 3*u*w^2 - 3*u - 2*v^2*w^2 + 2*v^2 + 3*v*w^2 - 3*v - w^2 + 1",
+     "-2*u^2*w^2 + 2*u^2 + u*w^2 - u",
+     "-2*v^2*w^2 + 2*v^2 + v*w^2 - v",
+    ),
    )
-#eval(code)
-=#
+eval(code)
