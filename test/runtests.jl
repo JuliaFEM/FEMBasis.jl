@@ -6,7 +6,7 @@ using TimerOutputs
 const to = TimerOutput()
 
 test_files = String[]
-push!(test_files, "test_create_lagrange_basis.jl")
+push!(test_files, "test_create_basis.jl")
 push!(test_files, "test_lagrange_elements.jl")
 
 @testset "FEMBasis.jl" begin

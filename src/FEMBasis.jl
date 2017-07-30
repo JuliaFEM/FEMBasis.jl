@@ -3,7 +3,7 @@
 
 module FEMBasis
 #using Logging
-include("create_lagrange_basis.jl")
+include("create_basis.jl")
 export get_reference_element_coordinates, eval_basis!, eval_dbasis!
 include("lagrange_segments.jl")
 export Seg2, Seg3
