@@ -32,4 +32,8 @@ export NSurf
 include("nurbs_solid.jl")
 export NSolid
 
+include("math.jl")
+export interpolate, interpolate!
+export grad, grad!
+
 end
