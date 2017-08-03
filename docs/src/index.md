@@ -6,12 +6,14 @@
 ```@meta
 DocTestSetup = quote
     using FEMBasis
+    using FEMBasis: jacobian
 end
 ```
 
 ## Functions
 
-```@docs
+```@autodocs
+Modules = [FEMBasis]
 ```
 
 ## Index

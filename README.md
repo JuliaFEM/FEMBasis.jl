@@ -2,7 +2,10 @@
 
 [![Build Status](https://travis-ci.org/JuliaFEM/FEMBasis.jl.svg?branch=master)](https://travis-ci.org/JuliaFEM/FEMBasis.jl)[![Coverage Status](https://coveralls.io/repos/github/JuliaFEM/FEMBasis.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaFEM/FEMBasis.jl?branch=master)[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliafem.github.io/FEMBasis.jl/stable)[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://juliafem.github.io/FEMBasis.jl/latest)[![Issues](https://img.shields.io/github/issues/JuliaFEM/FEMBasis.jl.svg)](https://github.com/JuliaFEM/FEMBasis.jl/issues)
 
-Package contains interpolation routines for standard finite element function spaces. Given ansatz and coordinates of domain, interpolation functions are calculated symbolically in a very general way to get efficient code. A concrete example, to evaluate basis functions for standard tetrahedron we write
+Package contains interpolation routines for standard finite element function spaces. 
+Given ansatz and coordinates of domain, interpolation functions are calculated 
+symbolically in a very general way to get efficient code. As a concrete example, 
+to evaluate basis functions for standard tetrahedron we write
 
 ```julia
 code = create_basis(
@@ -97,7 +100,9 @@ begin
 end
 ```
 
-Also more unusual elements can be defined. For example, pyramid element cannot be descibed with ansatz, but it's still possible to implement by defining shape functions, `Calculus.jl` is taking care of defining partial derivatives of function:
+Also more unusual elements can be defined. For example, pyramid element cannot be
+descibed with ansatz, but it's still possible to implement by defining shape functions,
+`Calculus.jl` is taking care of defining partial derivatives of function:
 ```julia
 code = create_basis(
     :Pyr5,
@@ -120,4 +125,23 @@ code = create_basis(
 eval(code)
 ```
 
-Basis function can have internal variables if needed, e.g. variable dof basis like hierarchical basis functions or NURBS.
+Basis function can have internal variables if needed, e.g. variable dof basis like
+hierarchical basis functions or NURBS.
+
+It's also possible to do some very common FEM calculations, like calculate Jacobian
+or gradient of some variable with respect to some coordinates. For example, to 
+calculate displacement gradient du/dX in unit square [0,1]^2, one could write:
+
+```julia
+B = Quad4()
+X = ([0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])
+u = ([0.0, 0.0], [1.0, -1.0], [2.0, 3.0], [0.0, 0.0])
+grad(B, u, X, (0.0, 0.0))
+```
+
+Result is
+```julia
+2×2 Array{Float64,2}:
+ 1.5  0.5
+ 1.0  2.0
+```
