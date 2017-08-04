@@ -117,13 +117,10 @@ function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{n
 
     # FIXME: this can be done better somehow
     if dim == 1
-        xitype = :(Tuple{T})
         unpack = :((u,) = xi)
     elseif dim == 2
-        xitype = :(Tuple{T,T})
         unpack = :((u, v) = xi)
     else
-        xitype = :(Tuple{T,T,T})
         unpack = :((u, v, w) = xi)
     end
 
@@ -148,13 +145,13 @@ function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{n
             return $X
         end
 
-        function FEMBasis.eval_basis!{T}(::Type{$name}, N::Matrix{T}, xi::$xitype)
+        function FEMBasis.eval_basis!{T}(::Type{$name}, N::Matrix{T}, xi)
             $unpack
             $Q
             return N
         end
 
-        function FEMBasis.eval_dbasis!{T}(::Type{$name}, dN::Matrix{T}, xi::$xitype)
+        function FEMBasis.eval_dbasis!{T}(::Type{$name}, dN::Matrix{T}, xi)
             $unpack
             $V
             return dN
