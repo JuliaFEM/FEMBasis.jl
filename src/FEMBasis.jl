@@ -35,5 +35,6 @@ export NSolid
 include("math.jl")
 export interpolate, interpolate!
 export grad, grad!
+export BasisInfo
 
 end
