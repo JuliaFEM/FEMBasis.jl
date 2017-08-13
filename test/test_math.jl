@@ -52,6 +52,12 @@ end
 end
 
 @testset "test BasisInfo" begin
+    B = BasisInfo(Seg2)
+    X = ((0.0,), (1.1))
+    xi = (0.0,)
+    eval_basis!(B, X, xi)
+    @test isapprox(B.invJ, inv(B.J))
+    @test isapprox(B.detJ, det(B.J))
     B = BasisInfo(Quad4)
     X = ((0.0,0.0), (1.1,0.0), (1.0,1.0), (0.0,1.0))
     xi = (0.0,0.0)
