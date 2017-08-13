@@ -50,3 +50,19 @@ end
     dudX_expected(X) = [X[2]+1 X[1]; 4*X[2]-1 4*X[1]]
     @test isapprox(dudX, dudX_expected([0.5, 0.5]))
 end
+
+@testset "test BasisInfo" begin
+    B = BasisInfo(Quad4)
+    X = ((0.0,0.0), (1.1,0.0), (1.0,1.0), (0.0,1.0))
+    xi = (0.0,0.0)
+    eval_basis!(B, X, xi)
+    @test isapprox(B.invJ, inv(B.J))
+    @test isapprox(B.detJ, det(B.J))
+    B = BasisInfo(Hex8)
+    X = ((0.0,0.0,0.0), (1.1,0.0,0.0), (1.0,1.0,0.0), (0.0,1.0,0.0),
+         (0.0,0.0,1.0), (1.0,0.0,1.0), (1.0,1.0,1.0), (0.0,1.0,1.0))
+    xi = (0.0,0.0,0.0)
+    eval_basis!(B, X, xi)
+    @test isapprox(B.invJ, inv(B.J))
+    @test isapprox(B.detJ, det(B.J))
+end

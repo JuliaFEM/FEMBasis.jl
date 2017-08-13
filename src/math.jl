@@ -132,3 +132,109 @@ function grad(B, T, X, xi)
     dTdX = sum(kron(G[:,i], T[i]') for i=1:nbasis)
     return dTdX'
 end
+
+
+"""
+Data type for fast FEM.
+"""
+type BasisInfo{B<:AbstractBasis,T}
+    N::Matrix{T}
+    dN::Matrix{T}
+    grad::Matrix{T}
+    J::Matrix{T}
+    invJ::Matrix{T}
+    detJ::T
+end
+
+"""
+Initialization of data type `BasisInfo`.
+
+# Examples
+
+```jldoctest
+
+BasisInfo(Tri3)
+
+# output
+
+FEMBasis.BasisInfo{FEMBasis.Tri3,Float64}([0.0 0.0 0.0], [0.0 0.0 0.0; 0.0 0.0 0.0], [0.0 0.0 0.0; 0.0 0.0 0.0], [0.0 0.0; 0.0 0.0], [0.0 0.0; 0.0 0.0], 0.0)
+
+```
+
+"""
+function BasisInfo{B<:AbstractBasis}(::Type{B}, T=Float64)
+    dim, nbasis = size(B)
+    N = zeros(T, 1, nbasis)
+    dN = zeros(T, dim, nbasis)
+    grad = zeros(T, dim, nbasis)
+    J = zeros(T, dim, dim)
+    invJ = zeros(T, dim, dim)
+    detJ = zero(T)
+    return BasisInfo{B,T}(N, dN, grad, J, invJ, detJ)
+end
+
+"""
+Evaluate basis, gradient and so on for some point `xi`.
+
+# Examples
+
+```jldoctest
+
+b = BasisInfo(Quad4)
+X = ((0.0,0.0), (1.0,0.0), (1.0,1.0), (0.0,1.0))
+xi = (0.0, 0.0)
+eval_basis!(b, X, xi)
+
+# output
+
+FEMBasis.BasisInfo{FEMBasis.Quad4,Float64}([0.25 0.25 0.25 0.25], [-0.25 0.25 0.25 -0.25; -0.25 -0.25 0.25 0.25], [-0.5 0.5 0.5 -0.5; -0.5 -0.5 0.5 0.5], [0.5 0.0; 0.0 0.5], [2.0 -0.0; -0.0 2.0], 0.25)
+
+```
+"""
+function eval_basis!{B}(bi::BasisInfo{B}, X, xi)
+
+    # evaluate basis and derivatives
+    eval_basis!(B, bi.N, xi)
+    eval_dbasis!(B, bi.dN, xi)
+
+    # calculate Jacobian
+    fill!(bi.J, 0.0)
+    dim, nbasis = size(B)
+    for i=1:nbasis
+        for j=1:dim
+            for k=1:dim
+                @inbounds bi.J[j,k] += bi.dN[j,i]*X[i][k]
+            end
+        end
+    end
+
+    # calculate inverse and determinant of Jacobian
+    if dim == 3
+        a, b, c, d, e, f, g, h, i = bi.J
+        bi.detJ = a*(e*i-f*h) + b*(f*g-d*i) + c*(d*h-e*g)
+        bi.invJ[1] = 1.0 / bi.detJ * (e*i - f*h)
+        bi.invJ[2] = 1.0 / bi.detJ * (c*h - b*i)
+        bi.invJ[3] = 1.0 / bi.detJ * (b*f - c*e)
+        bi.invJ[4] = 1.0 / bi.detJ * (f*g - d*i)
+        bi.invJ[5] = 1.0 / bi.detJ * (a*i - c*g)
+        bi.invJ[6] = 1.0 / bi.detJ * (c*d - a*f)
+        bi.invJ[7] = 1.0 / bi.detJ * (d*h - e*g)
+        bi.invJ[8] = 1.0 / bi.detJ * (b*g - a*h)
+        bi.invJ[9] = 1.0 / bi.detJ * (a*e - b*d)
+    elseif dim == 2
+        a, b, c, d = bi.J
+        bi.detJ = a*d - b*c
+        bi.invJ[1] = 1.0 / bi.detJ * d
+        bi.invJ[2] = 1.0 / bi.detJ * -b
+        bi.invJ[3] = 1.0 / bi.detJ * -c
+        bi.invJ[4] = 1.0 / bi.detJ * a
+    else
+        @assert dim == 1
+        bi.detJ = bi.J[1,1]
+        bi.invJ[1,1] = 1.0 / bi.detJ
+    end
+    
+    A_mul_B!(bi.grad, bi.invJ, bi.dN)
+
+    return bi
+end
