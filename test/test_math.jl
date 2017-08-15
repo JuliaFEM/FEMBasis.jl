@@ -72,3 +72,16 @@ end
     @test isapprox(B.invJ, inv(B.J))
     @test isapprox(B.detJ, det(B.J))
 end
+
+@testset "evaluate gradient using BasisInfo" begin
+    B = BasisInfo(Quad4)
+    X = ((0.0,0.0), (1.0,0.0), (1.0,1.0), (0.0,1.0))
+    xi = (0.0, 0.0)
+    eval_basis!(B, X, xi)
+    u = ((0.0, 0.0), (1.0, -1.0), (2.0, 3.0), (0.0, 0.0))
+    gradu = zeros(2, 2)
+    grad!(B, gradu, u)
+    println(gradu)
+    gradu_expected = [1.5 0.5; 1.0  2.0]
+    @test isapprox(gradu, gradu_expected)
+end
