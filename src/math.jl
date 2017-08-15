@@ -238,3 +238,51 @@ function eval_basis!{B}(bi::BasisInfo{B}, X, xi)
 
     return bi
 end
+
+"""
+    grad!(bi, gradu, u)
+
+Evalute gradient ∂u/∂X and store result to matrix `gradu`. It is assumed
+that `eval_basis!` has been already run to `bi` so it already contains
+all necessary matrices evaluated with some `X` and `xi`.
+
+# Example
+
+First setup and evaluate basis using `eval_basis!`:
+```jldoctest ex1
+B = BasisInfo(Quad4)
+X = ((0.0,0.0), (1.0,0.0), (1.0,1.0), (0.0,1.0))
+xi = (0.0, 0.0)
+eval_basis!(B, X, xi)
+
+# output
+
+FEMBasis.BasisInfo{FEMBasis.Quad4,Float64}([0.25 0.25 0.25 0.25], [-0.25 0.25 0.25 -0.25; -0.25 -0.25 0.25 0.25], [-0.5 0.5 0.5 -0.5; -0.5 -0.5 0.5 0.5], [0.5 0.0; 0.0 0.5], [2.0 -0.0; -0.0 2.0], 0.25)
+
+```
+
+Next, calculate gradient of `u`:
+```jldoctest ex1
+u = ((0.0, 0.0), (1.0, -1.0), (2.0, 3.0), (0.0, 0.0))
+gradu = zeros(2, 2)
+grad!(B, gradu, u)
+
+# output
+
+2×2 Array{Float64,2}:
+ 1.5  0.5
+ 1.0  2.0
+```
+"""
+function grad!{B}(bi::BasisInfo{B}, gradu, u)
+    dim, nbasis = size(B)
+    fill!(gradu, 0.0)
+    for i=1:dim
+        for j=1:dim
+            for k=1:nbasis
+                gradu[i,j] += bi.grad[j,k]*u[k][i]
+            end
+        end
+    end
+    return gradu
+end
