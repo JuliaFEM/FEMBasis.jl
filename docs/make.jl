@@ -7,5 +7,7 @@ makedocs(modules=[FEMBasis],
          format = :html,
          sitename = "FEMBasis",
          pages = [
-                  "FEMBasis" => "index.md",
+                  "Introduction" => "index.md",
+                  "Theory" => "theory.md",
+                  "API" => "api.md",
                  ])
