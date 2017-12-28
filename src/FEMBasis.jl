@@ -33,7 +33,7 @@ include("nurbs_solid.jl")
 export NSolid
 
 include("math.jl")
-export interpolate, interpolate!
+export interpolate, interpolate!, jacobian
 export grad, grad!
 export BasisInfo
 

@@ -3,11 +3,13 @@
 
 using Documenter, FEMBasis
 
+cp("../README.md", "src/index.md"; remove_destination=true)
+
 makedocs(modules=[FEMBasis],
          format = :html,
-         sitename = "FEMBasis",
+         checkdocs = :all,
+         sitename = "FEMBasis.jl",
          pages = [
                   "Introduction" => "index.md",
-                  "Theory" => "theory.md",
-                  "API" => "api.md",
+                  "API documentation" => "api.md",
                  ])

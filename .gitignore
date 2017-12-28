@@ -2,3 +2,4 @@ docs/build/
 docs/site/
 *.cov
 *.swp
+docs/src/index.md

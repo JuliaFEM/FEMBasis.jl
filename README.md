@@ -1,11 +1,10 @@
-# FEMBasis.jl
-
 [![Build Status](https://travis-ci.org/JuliaFEM/FEMBasis.jl.svg?branch=master)](https://travis-ci.org/JuliaFEM/FEMBasis.jl)[![Coverage Status](https://coveralls.io/repos/github/JuliaFEM/FEMBasis.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaFEM/FEMBasis.jl?branch=master)[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliafem.github.io/FEMBasis.jl/stable)[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://juliafem.github.io/FEMBasis.jl/latest)[![Issues](https://img.shields.io/github/issues/JuliaFEM/FEMBasis.jl.svg)](https://github.com/JuliaFEM/FEMBasis.jl/issues)
 
-Package contains interpolation routines for standard finite element function spaces. 
-Given ansatz and coordinates of domain, interpolation functions are calculated 
-symbolically in a very general way to get efficient code. As a concrete example, 
-to evaluate basis functions for standard tetrahedron we write
+`FEMBasis.jl` contains interpolation routines for standard finite element
+function spaces.  Given ansatz and coordinates of domain, interpolation
+functions are calculated  symbolically in a very general way to get efficient
+code. As a concrete example, to generate basis functions for a standard 10-node
+tetrahedron one can write
 
 ```julia
 code = create_basis(
