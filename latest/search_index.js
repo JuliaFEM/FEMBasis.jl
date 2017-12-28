@@ -73,6 +73,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api.html#FEMBasis.jacobian-Tuple{Any,Any,Any}",
+    "page": "API documentation",
+    "title": "FEMBasis.jacobian",
+    "category": "Method",
+    "text": "jacobian(B, X, xi)\n\nGiven basis B, calculate jacobian at xi.\n\nExample\n\nB = Quad4()\nX = ([0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])\njacobian(B, X, (0.0, 0.0))\n\n# output\n\n2×2 Array{Float64,2}:\n 0.5  0.0\n 0.0  0.5\n\n\n\n\n"
+},
+
+{
     "location": "api.html#FEMBasis.calculate_basis_coefficients-Tuple{Expr,Tuple}",
     "page": "API documentation",
     "title": "FEMBasis.calculate_basis_coefficients",
@@ -97,19 +105,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#FEMBasis.jacobian-Tuple{Any,Any,Any}",
-    "page": "API documentation",
-    "title": "FEMBasis.jacobian",
-    "category": "Method",
-    "text": "jacobian(B, X, xi)\n\nGiven basis B, calculate jacobian at xi.\n\nExample\n\nB = Quad4()\nX = ([0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])\njacobian(B, X, (0.0, 0.0))\n\n# output\n\n2×2 Array{Float64,2}:\n 0.5  0.0\n 0.0  0.5\n\n\n\n\n"
-},
-
-{
     "location": "api.html#",
     "page": "API documentation",
     "title": "API documentation",
     "category": "page",
-    "text": "DocTestSetup = quote\n    using FEMBasis\n    using FEMBasis: jacobian\nendModules = [FEMBasis]"
+    "text": "DocTestSetup = quote\n    using FEMBasis\nendModules = [FEMBasis]"
 },
 
 ]}
