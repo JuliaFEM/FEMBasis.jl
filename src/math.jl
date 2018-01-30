@@ -146,6 +146,14 @@ type BasisInfo{B<:AbstractBasis,T}
     detJ::T
 end
 
+function length{T<:AbstractBasis}(B::BasisInfo{T})
+    return length(T)
+end
+
+function size{T<:AbstractBasis}(B::BasisInfo{T})
+    return size(T)
+end
+
 """
 Initialization of data type `BasisInfo`.
 
