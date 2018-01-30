@@ -14,7 +14,7 @@
      (0.5, 0.0, 0.5), # N9
      (0.0, 0.5, 0.5), # N10
     ),
-    &quot;1 + u + v + w + u*v + v*w + w*u + u^2 + v^2 + w^2&quot;,
+    :(1 + u + v + w + u*v + v*w + w*u + u^2 + v^2 + w^2),
    )</code></pre><p>The resulting code is</p><pre><code class="language-julia">begin
     mutable struct Tet10
     end
@@ -94,11 +94,11 @@ end</code></pre><p>Also more unusual elements can be defined. For example, pyram
      ( 0.0,  0.0,  1.0), # N5
     ),
     (
-     &quot;1/8 * (1-u) * (1-v) * (1-w)&quot;,
-     &quot;1/8 * (1+u) * (1-v) * (1-w)&quot;,
-     &quot;1/8 * (1+u) * (1+v) * (1-w)&quot;,
-     &quot;1/8 * (1-u) * (1+v) * (1-w)&quot;,
-     &quot;1/2 * (1+w)&quot;,
+     :(1/8 * (1-u) * (1-v) * (1-w)),
+     :(1/8 * (1+u) * (1-v) * (1-w)),
+     :(1/8 * (1+u) * (1+v) * (1-w)),
+     :(1/8 * (1-u) * (1+v) * (1-w)),
+     :(1/2 * (1+w)),
     ),
    )
 eval(code)</code></pre><p>Basis function can have internal variables if needed, e.g. variable dof basis like hierarchical basis functions or NURBS.</p><p>It&#39;s also possible to do some very common FEM calculations, like calculate Jacobian or gradient of some variable with respect to some coordinates. For example, to  calculate displacement gradient du/dX in unit square [0,1]^2, one could write:</p><pre><code class="language-julia">B = Quad4()
