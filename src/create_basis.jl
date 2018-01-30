@@ -85,7 +85,7 @@ end
 """
 Calculate derivatives of basis functions with respect to parameters u, v, w.
 """
-function calculate_interpolation_polynomial_derivatives(basis::Vector, dim::Int)
+function calculate_interpolation_polynomial_derivatives(basis, dim)
     equations = Vector[]
     vars = [:u, :v, :w]
     nbasis = length(basis)
@@ -101,7 +101,7 @@ function calculate_interpolation_polynomial_derivatives(basis::Vector, dim::Int)
     return equations
 end
 
-function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis::Vector, dbasis::Vector)
+function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis, dbasis)
 
     Q = Expr(:block)
     for i=1:nbasis
@@ -174,6 +174,11 @@ end
 
 function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis_::NTuple{nbasis, String})
     basis = [parse(b) for b in basis_]
+    dbasis = calculate_interpolation_polynomial_derivatives(basis, dim)
+    return create_basis(name, description, X, basis, dbasis)
+end
+
+function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis::NTuple{nbasis, Expr})
     dbasis = calculate_interpolation_polynomial_derivatives(basis, dim)
     return create_basis(name, description, X, basis, dbasis)
 end
