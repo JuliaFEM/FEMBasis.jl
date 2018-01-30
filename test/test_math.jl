@@ -53,6 +53,8 @@ end
 
 @testset "test BasisInfo" begin
     B = BasisInfo(Seg2)
+    @test length(B) == 2
+    @test size(B) == (1, 2)
     X = ((0.0,), (1.1))
     xi = (0.0,)
     eval_basis!(B, X, xi)
