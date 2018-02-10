@@ -75,8 +75,16 @@ jacobian(B, X, (0.0, 0.0))
 """
 function jacobian(B, X, xi)
     dB = eval_dbasis(B, xi)
-    nbasis = length(B)
-    J = sum(kron(dB[:,i], X[i]') for i=1:nbasis)
+    dim1, nbasis = size(B)
+    dim2 = length(first(X))
+    J = zeros(dim1, dim2)
+    for i=1:dim1
+        for j=1:dim2
+            for k=1:nbasis
+                J[i,j] += dB[i,k]*X[k][j]
+            end
+        end
+    end
     return J
 end
 
@@ -205,19 +213,28 @@ function eval_basis!{B}(bi::BasisInfo{B}, X, xi)
     eval_basis!(B, bi.N, xi)
     eval_dbasis!(B, bi.dN, xi)
 
+    dim1, nbasis = size(B)
+    dim2 = length(first(X))
+    dims = (dim1, dim2)
+    if size(bi.J) != dims
+        bi.J = zeros(dim1, dim2)
+    else
+        fill!(bi.J, 0.0)
+    end
+
     # calculate Jacobian
-    fill!(bi.J, 0.0)
-    dim, nbasis = size(B)
-    for i=1:nbasis
-        for j=1:dim
-            for k=1:dim
-                @inbounds bi.J[j,k] += bi.dN[j,i]*X[i][k]
+
+    for i=1:dim1
+        for j=1:dim2
+            for k=1:nbasis
+                bi.J[i,j] += bi.dN[i,k]*X[k][j]
             end
         end
     end
 
-    # calculate inverse and determinant of Jacobian
-    if dim == 3
+    # calculate determinant of Jacobian + gradient operator
+
+    if dims == (3, 3)
         a, b, c, d, e, f, g, h, i = bi.J
         bi.detJ = a*(e*i-f*h) + b*(f*g-d*i) + c*(d*h-e*g)
         bi.invJ[1] = 1.0 / bi.detJ * (e*i - f*h)
@@ -229,20 +246,24 @@ function eval_basis!{B}(bi::BasisInfo{B}, X, xi)
         bi.invJ[7] = 1.0 / bi.detJ * (d*h - e*g)
         bi.invJ[8] = 1.0 / bi.detJ * (b*g - a*h)
         bi.invJ[9] = 1.0 / bi.detJ * (a*e - b*d)
-    elseif dim == 2
+        A_mul_B!(bi.grad, bi.invJ, bi.dN)
+    elseif dims == (2, 2)
         a, b, c, d = bi.J
         bi.detJ = a*d - b*c
         bi.invJ[1] = 1.0 / bi.detJ * d
         bi.invJ[2] = 1.0 / bi.detJ * -b
         bi.invJ[3] = 1.0 / bi.detJ * -c
         bi.invJ[4] = 1.0 / bi.detJ * a
-    else
-        @assert dim == 1
-        bi.detJ = bi.J[1,1]
-        bi.invJ[1,1] = 1.0 / bi.detJ
+        A_mul_B!(bi.grad, bi.invJ, bi.dN)
+    elseif dims == (1, 1)
+        bi.detJ = bi.J[1]
+        bi.invJ[1] = 1.0 / bi.detJ
+        bi.grad = bi.invJ * bi.dN
+    elseif dim1 == 1 # curve
+        bi.detJ = norm(bi.J)
+    elseif dim1 == 2 # manifold
+        bi.detJ = norm(cross(bi.J[1,:], bi.J[2,:]))
     end
-    
-    A_mul_B!(bi.grad, bi.invJ, bi.dN)
 
     return bi
 end
