@@ -93,7 +93,7 @@ function calculate_interpolation_polynomial_derivatives(basis, dim)
         deq = []
         for k=1:dim
             #println("∂($(basis[j])) / ∂$(vars[k])")
-            der = differentiate(basis[j], vars[k])
+            der = simplify(differentiate(basis[j], vars[k]))
             push!(deq, der)
         end
         push!(equations, deq)
