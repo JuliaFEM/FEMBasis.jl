@@ -3,19 +3,19 @@
 
 import Base: length, size
 
-function length{T<:AbstractBasis}(B::T)
+function length(B::T) where T<:AbstractBasis
     return length(T)
 end
 
-function size{T<:AbstractBasis}(B::T)
+function size(B::T) where T<:AbstractBasis
     return size(T)
 end
 
-function eval_basis!{T<:AbstractBasis}(B::T, N, xi)
+function eval_basis!(B::T, N, xi) where T<:AbstractBasis
     return eval_basis!(T, N, xi)
 end
 
-function eval_dbasis!{T<:AbstractBasis}(B::T, dN, xi)
+function eval_dbasis!(B::T, dN, xi) where T<:AbstractBasis
     return eval_dbasis!(T, dN, xi)
 end
 
@@ -145,7 +145,7 @@ end
 """
 Data type for fast FEM.
 """
-type BasisInfo{B<:AbstractBasis,T}
+mutable struct BasisInfo{B<:AbstractBasis,T}
     N::Matrix{T}
     dN::Matrix{T}
     grad::Matrix{T}
@@ -154,11 +154,11 @@ type BasisInfo{B<:AbstractBasis,T}
     detJ::T
 end
 
-function length{T<:AbstractBasis}(B::BasisInfo{T})
+function length(B::BasisInfo{T}) where T<:AbstractBasis
     return length(T)
 end
 
-function size{T<:AbstractBasis}(B::BasisInfo{T})
+function size(B::BasisInfo{T}) where T<:AbstractBasis
     return size(T)
 end
 
@@ -178,7 +178,7 @@ FEMBasis.BasisInfo{FEMBasis.Tri3,Float64}([0.0 0.0 0.0], [0.0 0.0 0.0; 0.0 0.0 0
 ```
 
 """
-function BasisInfo{B<:AbstractBasis}(::Type{B}, T=Float64)
+function BasisInfo(::Type{B}, T=Float64) where B<:AbstractBasis
     dim, nbasis = size(B)
     N = zeros(T, 1, nbasis)
     dN = zeros(T, dim, nbasis)
@@ -207,7 +207,7 @@ FEMBasis.BasisInfo{FEMBasis.Quad4,Float64}([0.25 0.25 0.25 0.25], [-0.25 0.25 0.
 
 ```
 """
-function eval_basis!{B}(bi::BasisInfo{B}, X, xi)
+function eval_basis!(bi::BasisInfo{B}, X, xi) where B
 
     # evaluate basis and derivatives
     eval_basis!(B, bi.N, xi)
@@ -303,7 +303,7 @@ grad!(B, gradu, u)
  1.0  2.0
 ```
 """
-function grad!{B}(bi::BasisInfo{B}, gradu, u)
+function grad!(bi::BasisInfo{B}, gradu, u) where B
     dim, nbasis = size(B)
     fill!(gradu, 0.0)
     for i=1:dim

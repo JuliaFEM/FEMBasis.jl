@@ -2,7 +2,7 @@
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
 """ NURBS segment. """
-type NSeg <: AbstractBasis
+mutable struct NSeg <: AbstractBasis
     order :: Int
     knots :: Vector{Float64}
     weights :: Vector{Float64}
