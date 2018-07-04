@@ -44,7 +44,7 @@ begin
     function FEMBasis.get_reference_element_coordinates(::Type{Tet10})
         return ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0), (0.5, 0.0, 0.0), (0.5, 0.5, 0.0), (0.0, 0.5, 0.0), (0.0, 0.0, 0.5), (0.5, 0.0, 0.5), (0.0, 0.5, 0.5))
     end
-    function FEMBasis.eval_basis!{T}(::Type{Tet10}, N::Matrix{T}, xi::Tuple{T, T, T})
+    function FEMBasis.eval_basis!(::Type{Tet10}, N::Matrix{T}, xi::Tuple{T, T, T}) where T
         (u, v, w) = xi
         begin
             N[1] = 1.0 + -3.0u + -3.0v + -3.0w + 4.0 * (u * v) + 4.0 * (v * w) + 4.0 * (w * u) + 2.0 * u ^ 2 + 2.0 * v ^ 2 + 2.0 * w ^ 2
@@ -60,7 +60,7 @@ begin
         end
         return N
     end
-    function FEMBasis.eval_dbasis!{T}(::Type{Tet10}, dN::Matrix{T}, xi::Tuple{T, T, T})
+    function FEMBasis.eval_dbasis!(::Type{Tet10}, dN::Matrix{T}, xi::Tuple{T, T, T}) where T
         (u, v, w) = xi
         begin
             dN[1, 1] = -3.0 + 4.0v + 4.0w + 2.0 * (2u)

@@ -101,7 +101,7 @@ function calculate_interpolation_polynomial_derivatives(basis, dim)
     return equations
 end
 
-function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis, dbasis)
+function create_basis(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis, dbasis) where {nbasis,dim}
 
     Q = Expr(:block)
     for i=1:nbasis
@@ -125,7 +125,7 @@ function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{n
     end
 
     code = quote
-        type $name <: FEMBasis.AbstractBasis
+        mutable struct $name <: FEMBasis.AbstractBasis
         end
 
         function Base.size(::Type{$name})
@@ -145,13 +145,13 @@ function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{n
             return $X
         end
 
-        function FEMBasis.eval_basis!{T}(::Type{$name}, N::Matrix{T}, xi)
+        function FEMBasis.eval_basis!(::Type{$name}, N::Matrix{T}, xi) where T
             $unpack
             $Q
             return N
         end
 
-        function FEMBasis.eval_dbasis!{T}(::Type{$name}, dN::Matrix{T}, xi)
+        function FEMBasis.eval_dbasis!(::Type{$name}, dN::Matrix{T}, xi) where T
             $unpack
             $V
             return dN
@@ -161,24 +161,24 @@ function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{n
     return code
 end
 
-function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, p::Expr)
+function create_basis(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, p::Expr) where {nbasis,dim}
     A = calculate_basis_coefficients(p, X)
     basis = calculate_interpolation_polynomials(p, A)
     dbasis = calculate_interpolation_polynomial_derivatives(basis, dim)
     return create_basis(name, description, X, basis, dbasis)
 end
 
-function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, p::String)
+function create_basis(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, p::String) where {nbasis,dim}
     create_basis(name, description, X, parse(p))
 end
 
-function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis_::NTuple{nbasis, String})
+function create_basis(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis_::NTuple{nbasis, String}) where {nbasis,dim}
     basis = [parse(b) for b in basis_]
     dbasis = calculate_interpolation_polynomial_derivatives(basis, dim)
     return create_basis(name, description, X, basis, dbasis)
 end
 
-function create_basis{nbasis,dim}(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis::NTuple{nbasis, Expr})
+function create_basis(name::Symbol, description::String, X::NTuple{nbasis, NTuple{dim, Float64}}, basis::NTuple{nbasis, Expr}) where {nbasis,dim}
     dbasis = calculate_interpolation_polynomial_derivatives(basis, dim)
     return create_basis(name, description, X, basis, dbasis)
 end

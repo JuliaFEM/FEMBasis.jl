@@ -1,7 +1,7 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-type NSolid <: AbstractBasis
+mutable struct NSolid <: AbstractBasis
     order_u :: Int
     order_v :: Int
     order_w :: Int

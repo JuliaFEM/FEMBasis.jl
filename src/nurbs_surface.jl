@@ -1,7 +1,7 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-type NSurf <: AbstractBasis
+mutable struct NSurf <: AbstractBasis
     order_u :: Int
     order_v :: Int
     knots_u :: Vector{Float64}
