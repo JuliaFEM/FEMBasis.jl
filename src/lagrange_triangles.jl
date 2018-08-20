@@ -9,7 +9,7 @@ code = create_basis(
      (1.0, 0.0), # N2
      (0.0, 1.0), # N3
     ),
-    "1 + u + v",
+    :(1 + u + v),
    )
 eval(code)
 
@@ -24,7 +24,7 @@ code = create_basis(
      (0.5, 0.5), # N5
      (0.0, 0.5), # N6
     ),
-    "1 + u + v + u^2 + u*v + v^2",
+    :(1 + u + v + u^2 + u*v + v^2),
    )
 eval(code)
 
@@ -40,6 +40,6 @@ code = create_basis(
      (0.0, 0.5), # N6
      (1/3, 1/3), # N7
     ),
-    "1 + u + v + u^2 + u*v + v^2 + u^2*v^2",
+    :(1 + u + v + u^2 + u*v + v^2 + u^2*v^2),
    )
 eval(code)

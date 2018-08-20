@@ -14,7 +14,7 @@ code = create_basis(
      ( 1.0,  1.0,  1.0), # N7
      (-1.0,  1.0,  1.0), # N8
     ),
-    "1 + u + v + w + u*v + v*w + w*u + u*v*w",
+    :(1 + u + v + w + u*v + v*w + w*u + u*v*w),
    )
 eval(code)
 
@@ -43,7 +43,7 @@ code = create_basis(
      ( 0.0,  1.0,  1.0), # N19
      (-1.0,  0.0,  1.0), # N20
     ),
-    "1 + u + v + w + u*v + v*w + u*w + u*v*w + u^2 + v^2 + w^2 + u^2*v + u*v^2 + v^2*w + v*w^2 + u*w^2 + u^2*w + u^2*v*w + u*v^2*w + u*v*w^2",
+    :(1 + u + v + w + u*v + v*w + u*w + u*v*w + u^2 + v^2 + w^2 + u^2*v + u*v^2 + v^2*w + v*w^2 + u*w^2 + u^2*w + u^2*v*w + u*v^2*w + u*v*w^2),
    )
 eval(code)
 
@@ -79,6 +79,6 @@ code = create_basis(
      ( 0.0,  0.0,  1.0), # N26
      ( 0.0,  0.0,  0.0), # N27
     ),
-    "1 + u + v + w + u*v + v*w + u*w + u*v*w + u^2 + v^2 + w^2 + u^2*v + u*v^2 + v^2*w + v*w^2 + u*w^2 + u^2*w + u^2*v*w + u*v^2*w + u*v*w^2 + u^2*v^2 + v^2*w^2 + u^2*w^2 + u^2*v^2*w + u*v^2*w^2 + u^2*v*w^2 + u^2*v^2*w^2",
+    :(1 + u + v + w + u*v + v*w + u*w + u*v*w + u^2 + v^2 + w^2 + u^2*v + u*v^2 + v^2*w + v*w^2 + u*w^2 + u^2*w + u^2*v*w + u*v^2*w + u*v*w^2 + u^2*v^2 + v^2*w^2 + u^2*w^2 + u^2*v^2*w + u*v^2*w^2 + u^2*v*w^2 + u^2*v^2*w^2),
    )
 eval(code)

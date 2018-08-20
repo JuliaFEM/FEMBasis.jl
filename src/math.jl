@@ -246,7 +246,7 @@ function eval_basis!(bi::BasisInfo{B}, X, xi) where B
         bi.invJ[7] = 1.0 / bi.detJ * (d*h - e*g)
         bi.invJ[8] = 1.0 / bi.detJ * (b*g - a*h)
         bi.invJ[9] = 1.0 / bi.detJ * (a*e - b*d)
-        A_mul_B!(bi.grad, bi.invJ, bi.dN)
+        mul!(bi.grad, bi.invJ, bi.dN)
     elseif dims == (2, 2)
         a, b, c, d = bi.J
         bi.detJ = a*d - b*c
@@ -254,7 +254,7 @@ function eval_basis!(bi::BasisInfo{B}, X, xi) where B
         bi.invJ[2] = 1.0 / bi.detJ * -b
         bi.invJ[3] = 1.0 / bi.detJ * -c
         bi.invJ[4] = 1.0 / bi.detJ * a
-        A_mul_B!(bi.grad, bi.invJ, bi.dN)
+        mul!(bi.grad, bi.invJ, bi.dN)
     elseif dims == (1, 1)
         bi.detJ = bi.J[1]
         bi.invJ[1] = 1.0 / bi.detJ

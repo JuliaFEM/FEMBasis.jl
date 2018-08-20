@@ -2,9 +2,13 @@
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
 module FEMBasis
-#using Logging
+
+using LinearAlgebra
 
 abstract type AbstractBasis end
+
+include("subs.jl")
+include("vandermonde.jl")
 
 include("create_basis.jl")
 export get_reference_element_coordinates, eval_basis!, eval_dbasis!

@@ -5,12 +5,12 @@ code = create_basis(
     :Seg2,
     "2 node linear segment/line element",
     ( (-1.0,), ( 1.0,) ),
-    "1 + u")
+    :(1 + u))
 eval(code)
 
 code = create_basis(
     :Seg3,
     "3 node quadratic segment/line element",
     ( (-1.0,), (1.0,), (0.0,)),
-    "1 + u + u^2")
+    :(1 + u + u^2))
 eval(code)
