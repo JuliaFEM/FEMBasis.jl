@@ -1,110 +1,67 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-using Base.Test
 using FEMBasis
-#using FEMBasis: calculate_basis_coefficients, calculate_interpolation_polynomials,
-#                calculate_interpolation_polynomial_derivatives, create_lagrange_basis
+using FEMBasis: create_basis
+using Test
 
-@testset "FEMBasis.jl" begin
+X = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+basis = [:(1.0 - u - v), :(1.0u), :(1.0v)]
+dbasis = Vector[[-1.0, -1.0], [1.0, 0.0], [0.0, 1.0]]
 
-@testset "Calculate interpolation polynomial matrix" begin
-    p = :(1 + u + v)
-    X = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-    A = FEMBasis.calculate_basis_coefficients(p, X)
-    A_expected = [1.0 0.0 0.0; 1.0 1.0 0.0; 1.0 0.0 1.0]
-    @test isapprox(A, A_expected)
+code = create_basis(:TestTriangle1, "test triangle 1", X, basis, dbasis)
+eval(code)
+N = zeros(1,size(TestTriangle1, 2))
+X = get_reference_element_coordinates(TestTriangle1)
+for i=1:length(TestTriangle1)
+    eval_basis!(TestTriangle1, N, X[i])
+    N_expected = zeros(1, length(TestTriangle1))
+    N_expected[i] = 1.0
+    @test isapprox(N, N_expected)
 end
+dN = zeros(size(TestTriangle1)...)
+eval_dbasis!(TestTriangle1, dN, X[1])
+@test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
+eval_dbasis!(TestTriangle1, dN, X[2])
+@test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
+eval_dbasis!(TestTriangle1, dN, X[3])
+@test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
 
-@testset "Calculate interpolation polynomials" begin
-    p = :(1 + u + v)
-    A = [1.0 0.0 0.0; 1.0 1.0 0.0; 1.0 0.0 1.0]
-    equations = FEMBasis.calculate_interpolation_polynomials(p, A)
-    @test equations[1] == :(1.0 + -u + -v)
-    @test equations[2] == :(+u)
-    @test equations[3] == :(+v)
+
+code = create_basis(:TestTriangle2, "test triangle 2", X, basis)
+eval(code)
+N = zeros(1,size(TestTriangle2, 2))
+X = get_reference_element_coordinates(TestTriangle2)
+for i=1:length(TestTriangle2)
+    eval_basis!(TestTriangle2, N, X[i])
+    N_expected = zeros(1, length(TestTriangle2))
+    N_expected[i] = 1.0
+    @test isapprox(N, N_expected)
 end
+dN = zeros(size(TestTriangle2)...)
+eval_dbasis!(TestTriangle2, dN, X[1])
+@test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
+eval_dbasis!(TestTriangle2, dN, X[2])
+@test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
+eval_dbasis!(TestTriangle2, dN, X[3])
+@test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
 
 
-@testset "Calculate derivatives of interpolation polynomials" begin
-    basis = [:(1.0 - u - v), :(1.0u), :(1.0v)]
-    dbasis = FEMBasis.calculate_interpolation_polynomial_derivatives(basis, 2)
-    @test isapprox(dbasis[1][1], -1.0)
-    @test isapprox(dbasis[1][2], -1.0)
-    @test isapprox(dbasis[2][1], 1.0)
-    @test isapprox(dbasis[2][2], 0.0)
-    @test isapprox(dbasis[3][1], 0.0)
-    @test isapprox(dbasis[3][2], 1.0)
+p = :(1 + u + v)
+code = create_basis(:TestTriangle3, "test triangle 3", X, p)
+eval(code)
+N = zeros(1, size(TestTriangle3, 2))
+X = get_reference_element_coordinates(TestTriangle3)
+for i=1:length(TestTriangle3)
+    eval_basis!(TestTriangle3, N, X[i])
+    N_expected = zeros(1, length(TestTriangle3))
+    N_expected[i] = 1.0
+    @test isapprox(N, N_expected)
 end
-
-@testset "test create basis, N and dN given" begin
-    X = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-    basis = [:(1.0 - u - v), :(1.0u), :(1.0v)]
-    dbasis = Vector[[-1.0, -1.0], [1.0, 0.0], [0.0, 1.0]]
-    code = FEMBasis.create_basis(:TestTriangle, "test triangle", X, basis, dbasis)
-    eval(code)
-    N = zeros(1,size(TestTriangle, 2))
-    X = get_reference_element_coordinates(TestTriangle)
-    for i=1:length(TestTriangle)
-        eval_basis!(TestTriangle, N, X[i])
-        N_expected = zeros(1, length(TestTriangle))
-        N_expected[i] = 1.0
-        @test isapprox(N, N_expected)
-    end
-    dN = zeros(size(TestTriangle)...)
-    eval_dbasis!(TestTriangle, dN, X[1])
-    @test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
-    eval_dbasis!(TestTriangle, dN, X[2])
-    @test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
-    eval_dbasis!(TestTriangle, dN, X[3])
-    @test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
-end
-
-@testset "test create basis, N given" begin
-    X = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-    basis = ( :(1 - u - v), :(1.0u), :(1.0v) )
-    code = FEMBasis.create_basis(:TestTriangle, "test triangle", X, basis)
-    eval(code)
-    N = zeros(1,size(TestTriangle, 2))
-    X = get_reference_element_coordinates(TestTriangle)
-    for i=1:length(TestTriangle)
-        eval_basis!(TestTriangle, N, X[i])
-        N_expected = zeros(1, length(TestTriangle))
-        N_expected[i] = 1.0
-        @test isapprox(N, N_expected)
-    end
-    dN = zeros(size(TestTriangle)...)
-    eval_dbasis!(TestTriangle, dN, X[1])
-    @test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
-    eval_dbasis!(TestTriangle, dN, X[2])
-    @test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
-    eval_dbasis!(TestTriangle, dN, X[3])
-    @test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
-end
-
-@testset "test create basis, ansatz polynomial given" begin
-    X = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-    p1 = :(1 + u + v)
-    p2 = "1 + u + v"
-    code1 = FEMBasis.create_basis(:TestTriangle, "test triangle", X, p1)
-    code2 = FEMBasis.create_basis(:TestTriangle, "test triangle", X, p2)
-    @test code1 == code2
-    eval(code1)
-    N = zeros(1,size(TestTriangle, 2))
-    X = get_reference_element_coordinates(TestTriangle)
-    for i=1:length(TestTriangle)
-        eval_basis!(TestTriangle, N, X[i])
-        N_expected = zeros(1, length(TestTriangle))
-        N_expected[i] = 1.0
-        @test isapprox(N, N_expected)
-    end
-    dN = zeros(size(TestTriangle)...)
-    eval_dbasis!(TestTriangle, dN, X[1])
-    @test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
-    eval_dbasis!(TestTriangle, dN, X[2])
-    @test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
-    eval_dbasis!(TestTriangle, dN, X[3])
-    @test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
-end
-
-end
+dN = zeros(size(TestTriangle3)...)
+eval_dbasis!(TestTriangle3, dN, X[1])
+@test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
+eval_dbasis!(TestTriangle3, dN, X[2])
+@test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
+eval_dbasis!(TestTriangle3, dN, X[3])
+@test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])

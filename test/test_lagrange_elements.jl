@@ -1,9 +1,8 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-using Base.Test
-
 using FEMBasis
+using Test
 
 function test_elements(elements::Symbol...)
     for i in 1:length(elements)
