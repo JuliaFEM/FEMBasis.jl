@@ -1,7 +1,10 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
+using FEMBasis
 using Test
+
+include("../docs/make.jl")
 
 @testset "FEMBasis.jl" begin
     @testset "test substitution" begin include("test_substitute.jl") end
@@ -12,3 +15,5 @@ using Test
     @testset "test_nurbs_elements" begin include("test_nurbs_elements.jl") end
     @testset "test_math" begin include("test_math.jl") end
 end
+
+include("../docs/deploy.jl")
