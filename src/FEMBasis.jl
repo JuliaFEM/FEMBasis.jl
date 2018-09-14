@@ -3,9 +3,22 @@
 
 module FEMBasis
 
+import Calculus
 using LinearAlgebra
+using Tensors
+# Reexport Vec
+export Vec
+
+const Vecish{N, T} = Union{NTuple{N, T}, Vec{N, T}}
 
 abstract type AbstractBasis end
+# Forward methods on instances to types
+Base.length(B::T) where T<:AbstractBasis = length(T)
+Base.size(B::T) where T<:AbstractBasis = size(T)
+dim(B::T) where T<:AbstractBasis = dim(T)
+eval_basis!(B::T, N, xi) where T<:AbstractBasis = eval_basis!(T, N, xi)
+eval_dbasis!(B::T, dN, xi) where T<:AbstractBasis = eval_dbasis!(T, dN, xi)
+
 
 include("subs.jl")
 include("vandermonde.jl")
