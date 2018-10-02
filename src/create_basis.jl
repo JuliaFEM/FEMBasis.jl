@@ -39,24 +39,25 @@ function calculate_interpolation_polynomial_derivatives(basis, D)
     return dbasis
 end
 
-function create_basis(name, description, X::Vector{NTuple{D, T}}, p::Expr) where {D, T}
+function create_basis(name, description, X::Vector{<:Vecish{D}}, p::Expr) where D
     @debug "create basis given antsatz polynomial" name description X p
     V = vandermonde_matrix(p, X)
     basis = calculate_interpolation_polynomials(p, V)
     return create_basis(name, description, X, basis)
 end
 
-function create_basis(name, description, X::Vector{NTuple{D, T}}, basis::Vector) where {D, T}
+function create_basis(name, description, X::Vector{<:Vecish{D}}, basis::Vector) where D
     @assert length(X) == length(basis)
     @debug "create basis given basis functions" name description X basis
     dbasis = calculate_interpolation_polynomial_derivatives(basis, D)
     return create_basis(name, description, X, basis, dbasis)
 end
 
-function create_basis(name, description, X::Vector{NTuple{D, T}}, basis, dbasis) where {D, T}
+function create_basis(name, description, X::Vector{<:Vecish{D, T}}, basis, dbasis) where {D, T}
     N = length(X)
     @debug "create basis given basis functions and derivatives" name description X basis dbasis
 
+    # TODO: Perhaps add @inbounds
     Q = Expr(:block)
     for i=1:N
         push!(Q.args, :(N[$i] = $(basis[i])))
@@ -76,7 +77,7 @@ function create_basis(name, description, X::Vector{NTuple{D, T}}, basis, dbasis)
     end
 
     code = quote
-        struct $name <: FEMBasis.AbstractBasis
+        struct $name <: FEMBasis.AbstractBasis{$D}
         end
 
         Base.@pure function Base.size(::Type{$name})
@@ -92,19 +93,19 @@ function create_basis(name, description, X::Vector{NTuple{D, T}}, basis, dbasis)
             return $N
         end
 
-        dim(::Type{$name}) = $D
-
         function FEMBasis.get_reference_element_coordinates(::Type{$name})
             return $X
         end
 
-        function FEMBasis.eval_basis!(::Type{$name}, N::Vector, xi)
+        function FEMBasis.eval_basis!(::Type{$name}, N::Vector{<:Number}, xi::Vec{$D})
+            @assert length(N) == $N
             $unpack
             $Q
             return N
         end
 
-        function FEMBasis.eval_dbasis!(::Type{$name}, dN::Vector, xi)
+        function FEMBasis.eval_dbasis!(::Type{$name}, dN::Vector{<:Vec{$D}}, xi::Vec{$D})
+            @assert length(dN) == $N
             $unpack
             $V
             return dN

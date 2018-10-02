@@ -1,9 +1,6 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-eval_basis(B::AbstractBasis, xi) = eval_basis!(B, zeros(length(B)), xi)
-eval_dbasis(B::AbstractBasis, xi) = eval_dbasis!(B, zeros(Vec{dim(B)}, length(B)), xi)
-
 """
     interpolate(B, T, xi)
 
@@ -12,21 +9,18 @@ Given basis B, interpolate T at xi.
 # Example
 ```jldoctest
 B = Quad4()
-X = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
-T = (1.0, 2.0, 3.0, 4.0)
+X = Vec.([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])
+T = [1.0, 2.0, 3.0, 4.0]
 interpolate(B, T, (0.0, 0.0))
 
 # output
 
 2.5
-
 ```
 """
-interpolate(B::AbstractBasis, T, xi) = interpolate(B, T, xi, eval_basis(B, xi))
-
-function interpolate(B::AbstractBasis, T, xi, N)
-    Ti = sum(b*t for (b, t) in zip(N, T))
-    return Ti
+function interpolate(B::AbstractBasis{dim}, T::Vector{<:Number}, xi::Vecish{dim}) where {dim}
+    N = eval_basis(B, xi)
+    return sum(b*t for (b, t) in zip(N, T))
 end
 
 """
@@ -48,16 +42,18 @@ jacobian(B, X, Vec((0.0, 0.0)))
 
 ```
 """
-jacobian(B::AbstractBasis, X, xi) = jacobian(B, X, xi, eval_dbasis(B, xi))
+jacobian(B::AbstractBasis{dim}, X, xi) where {dim} = jacobian(B, X, xi, eval_dbasis(B, xi))
 
-function jacobian(B::AbstractBasis, X::Vector, xi, dB)
+function jacobian(B::AbstractBasis{dim}, X::Vector, xi, dB) where {dim}
     @assert length(X) == length(B)
-    J = zero(Tensor{2, dim(B)})
+    J = zero(Tensor{2, dim})
     for i = 1:length(X)
-        J += dB[i] ⊗ X[i]
+        J += otimes(dB[i], X[i]) # dB[i] ⊗ X[i]
     end
     return J
 end
+
+
 
 """
     grad(B, X, xi)
@@ -78,9 +74,9 @@ grad(B, X, (0.0, 0.0))
 
 ```
 """
-grad(B, X, xi) = grad(B, X, xi, eval_dbasis(B, xi))
+grad(B, X, xi) = _grad(B, X, xi, eval_dbasis(B, xi))
 
-function grad(B, X, xi, dB)
+function _grad(B, X, xi, dB::Vector{<:Vec})
     J = jacobian(B, X, xi, dB)
     return [inv(J) ⋅ db for db in dB]
 end
@@ -115,23 +111,17 @@ end
 """
 Data type for fast FEM.
 """
-mutable struct BasisInfo{B<:AbstractBasis,T}
-    # TODO, Fixup
+mutable struct BasisInfo{B<:AbstractBasis,dim, T}
     N::Vector{T}
     dN::Vector{T}
     grad::Vector{T}
-    J::Tensor{2, T}
-    invJ::Tensor{2, T}
+    J::Tensor{2, dim, T}
+    invJ::Tensor{2, dim, T}
     detJ::T
 end
 
-function length(B::BasisInfo{T}) where T<:AbstractBasis
-    return length(T)
-end
-
-function size(B::BasisInfo{T}) where T<:AbstractBasis
-    return size(T)
-end
+Base.length(B::BasisInfo{T}) where T<:AbstractBasis = length(T)
+Base.size(B::BasisInfo{T})   where T<:AbstractBasis = size(T)
 
 """
 Initialization of data type `BasisInfo`.
@@ -149,15 +139,15 @@ FEMBasis.BasisInfo{FEMBasis.Tri3,Float64}([0.0 0.0 0.0], [0.0 0.0 0.0; 0.0 0.0 0
 ```
 
 """
-function BasisInfo(::Type{B}, T=Float64) where B<:AbstractBasis
-    dim, nbasis = size(B)
-    N = zeros(T, 1, nbasis)
-    dN = zeros(T, dim, nbasis)
-    grad = zeros(T, dim, nbasis)
-    J = zeros(T, dim, dim)
-    invJ = zeros(T, dim, dim)
+function BasisInfo(::Type{B}, T=Float64) where B <: AbstractBasis{dim} where dim
+    nbasis = length(B)
+    N = zeros(T, nbasis)
+    dN = zeros(Vec{dim, T}, nbasis)
+    grad = zeros(Vec{dim, T}, nbasis)
+    J = zero(Tensor{2, dim, T})
+    invJ = zero(Tensor{2, dim, T})
     detJ = zero(T)
-    return BasisInfo{B,T}(N, dN, grad, J, invJ, detJ)
+    return BasisInfo{B,dim,T}(N, dN, grad, J, invJ, detJ)
 end
 
 """
@@ -217,8 +207,8 @@ all necessary matrices evaluated with some `X` and `xi`.
 First setup and evaluate basis using `eval_basis!`:
 ```jldoctest ex1
 B = BasisInfo(Quad4)
-X = ((0.0,0.0), (1.0,0.0), (1.0,1.0), (0.0,1.0))
-xi = (0.0, 0.0)
+X = Vec.([(0.0,0.0), (1.0,0.0), (1.0,1.0), (0.0,1.0)])
+xi = Vec(0.0, 0.0)
 eval_basis!(B, X, xi)
 
 # output
@@ -229,8 +219,8 @@ FEMBasis.BasisInfo{FEMBasis.Quad4,Float64}([0.25 0.25 0.25 0.25], [-0.25 0.25 0.
 
 Next, calculate gradient of `u`:
 ```jldoctest ex1
-u = ((0.0, 0.0), (1.0, -1.0), (2.0, 3.0), (0.0, 0.0))
-grad(B, gradu)
+u = Vec.([(0.0, 0.0), (1.0, -1.0), (2.0, 3.0), (0.0, 0.0)])
+grad(B, u)
 
 # output
 
@@ -239,9 +229,9 @@ grad(B, gradu)
  1.0  2.0
 ```
 """
-function grad(bi::BasisInfo{B}, u) where B
-    dim, nbasis = size(B)
-    gradu = zero(Tensor{2, dim(B)})
+function grad(bi::BasisInfo{B} where B <: AbstractBasis{dim}, u)  where dim
+    nbasis = length(B)
+    gradu = zero(Tensor{2, B})
     for k=1:nbasis
         gradu += bi.grad * u[k]
     end
