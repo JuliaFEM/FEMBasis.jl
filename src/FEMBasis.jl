@@ -30,7 +30,6 @@ include("lagrange_segments.jl")
 export Seg2, Seg3
 include("lagrange_quadrangles.jl")
 export Quad4, Quad8, Quad9
-#=
 include("lagrange_triangles.jl")
 export Tri3, Tri6, Tri7
 include("lagrange_tetrahedrons.jl")
@@ -49,7 +48,6 @@ include("nurbs_surface.jl")
 export NSurf
 include("nurbs_solid.jl")
 export NSolid
-=#
 include("math.jl")
 export interpolate, interpolate!, jacobian
 export grad, grad!

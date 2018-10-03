@@ -1,7 +1,7 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-code = create_basis(
+code = create_basis_and_eval(
     :Hex8,
     "8 node linear hexahedral element",
     [
@@ -17,7 +17,7 @@ code = create_basis(
     :(1 + u + v + w + u*v + v*w + w*u + u*v*w),
    )
 
-code = create_basis(
+code = create_basis_and_eval(
     :Hex20,
     "20 node biquadratic hexahedral element",
     [
@@ -45,7 +45,7 @@ code = create_basis(
     :(1 + u + v + w + u*v + v*w + u*w + u*v*w + u^2 + v^2 + w^2 + u^2*v + u*v^2 + v^2*w + v*w^2 + u*w^2 + u^2*w + u^2*v*w + u*v^2*w + u*v*w^2),
    )
 
-code = create_basis(
+code = create_basis_and_eval(
     :Hex27,
     "27 node quadratic hexahedral element",
     [

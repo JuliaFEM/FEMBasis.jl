@@ -5,21 +5,21 @@ using FEMBasis
 using FEMBasis: create_basis
 using Test
 
-X = ((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+X = [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0)]
 basis = [:(1.0 - u - v), :(1.0u), :(1.0v)]
-dbasis = Vector[[-1.0, -1.0], [1.0, 0.0], [0.0, 1.0]]
+dbasis = [-1.0 -1.0; 1.0 0.0 ; 0.0 1.0]'
 
 code = create_basis(:TestTriangle1, "test triangle 1", X, basis, dbasis)
 eval(code)
-N = zeros(1,size(TestTriangle1, 2))
+N = zeros(length(TestTriangle1, 2))
 X = get_reference_element_coordinates(TestTriangle1)
 for i=1:length(TestTriangle1)
     eval_basis!(TestTriangle1, N, X[i])
-    N_expected = zeros(1, length(TestTriangle1))
+    N_expected = zeros(length(TestTriangle1))
     N_expected[i] = 1.0
     @test isapprox(N, N_expected)
 end
-dN = zeros(size(TestTriangle1)...)
+dN = [Vec{zeros(size(TestTriangle1)...)
 eval_dbasis!(TestTriangle1, dN, X[1])
 @test isapprox(dN, [-1.0 1.0 0.0; -1.0 0.0 1.0])
 eval_dbasis!(TestTriangle1, dN, X[2])

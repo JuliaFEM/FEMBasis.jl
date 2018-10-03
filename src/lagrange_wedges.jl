@@ -2,7 +2,7 @@
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
 # Kaltenbacher, Manfred. Numerical simulation of mechatronic sensors and actuators: finite elements for computational multiphysics. Springer, 2015.
-code = create_basis(
+create_basis_and_eval(
     :Wedge6,
     "6 node linear prismatic/wedge element",
     [
@@ -24,7 +24,7 @@ code = create_basis(
    )
 
 # Basis functions are from ABAQUS theory manual
-code = create_basis(
+create_basis_and_eval(
     :Wedge15,
     "15 node quadratic prismatic/wedge element",
     [

@@ -1,7 +1,7 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-code = create_basis(
+code = create_basis_and_eval(
     :Quad4,
     "4 node linear quadrangle element",
     [
@@ -13,7 +13,7 @@ code = create_basis(
     :(1 + u + v + u*v),
    )
 
-code = create_basis(
+code = create_basis_and_eval(
     :Quad8,
     "8 node quadratic quadrangle element (Serendip)",
     [
@@ -29,7 +29,7 @@ code = create_basis(
     :(1 + u + v + u*v + u^2 + u^2*v + u*v^2 + v^2),
    )
 
-code = create_basis(
+code = create_basis_and_eval(
     :Quad9,
     "9 node quadratic quadrangle element",
     [

@@ -1,7 +1,7 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-code = create_basis(
+code = create_basis_and_eval(
     :Seg2,
     "2 node linear segment/line element",
     [
@@ -10,7 +10,7 @@ code = create_basis(
     ],
     :(1 + u))
 
-code = create_basis(
+code = create_basis_and_eval(
     :Seg3,
     "3 node quadratic segment/line element",
     [

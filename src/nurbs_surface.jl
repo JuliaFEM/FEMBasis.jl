@@ -1,7 +1,7 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-mutable struct NSurf <: AbstractBasis
+mutable struct NSurf <: AbstractBasis{2}
     order_u :: Int
     order_v :: Int
     knots_u :: Vector{Float64}
@@ -26,7 +26,7 @@ function size(basis::NSurf)
     return (2, length(basis))
 end
 
-function eval_basis!(basis::NSurf, N::Matrix, xi)
+function eval_basis!(basis::NSurf, N::Vector, xi::Vec{2})
     pu = basis.order_u
     pv = basis.order_v
     tu = basis.knots_u

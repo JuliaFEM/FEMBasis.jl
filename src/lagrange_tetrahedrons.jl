@@ -1,7 +1,7 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-code = create_basis(
+code = create_basis_and_eval(
     :Tet4,
     "4 node linear tetrahedral element",
     [
@@ -13,7 +13,7 @@ code = create_basis(
     :(1 + u + v + w),
    )
 
-code = create_basis(
+code = create_basis_and_eval(
     :Tet10,
     "10 node quadratic tetrahedral element",
     [

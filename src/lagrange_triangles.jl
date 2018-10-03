@@ -1,7 +1,7 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-code = create_basis(
+code = create_basis_and_eval(
     :Tri3,
     "3 node linear triangle element",
     [
@@ -12,7 +12,7 @@ code = create_basis(
     :(1 + u + v),
    )
 
-code = create_basis(
+code = create_basis_and_eval(
     :Tri6,
     "6 node quadratic triangle element",
     [
@@ -26,7 +26,7 @@ code = create_basis(
     :(1 + u + v + u^2 + u*v + v^2),
    )
 
-code = create_basis(
+code = create_basis_and_eval(
     :Tri7,
     "7 node quadratic triangle element (has middle node)",
     [

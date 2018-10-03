@@ -2,7 +2,7 @@
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
 """ NURBS segment. """
-mutable struct NSeg <: AbstractBasis
+mutable struct NSeg <: AbstractBasis{1}
     order :: Int
     knots :: Vector{Float64}
     weights :: Vector{Float64}
@@ -23,7 +23,7 @@ function size(basis::NSeg)
     return (1, length(basis))
 end
 
-function eval_basis!(basis::NSeg, N::Matrix, xi)
+function eval_basis!(basis::NSeg, N::Vector, xi::Vec{1})
     pu = basis.order
     tu = basis.knots
     w = basis.weights

@@ -50,14 +50,13 @@ function create_basis(name, description, X::Vector{<:Vecish{D}}, basis::Vector) 
     @assert length(X) == length(basis)
     @debug "create basis given basis functions" name description X basis
     dbasis = calculate_interpolation_polynomial_derivatives(basis, D)
-    return create_basis(name, description, X, basis, dbasis)
+    return create_basis(name, description, Vec.(X), basis, dbasis)
 end
 
 function create_basis(name, description, X::Vector{<:Vecish{D, T}}, basis, dbasis) where {D, T}
     N = length(X)
     @debug "create basis given basis functions and derivatives" name description X basis dbasis
 
-    # TODO: Perhaps add @inbounds
     Q = Expr(:block)
     for i=1:N
         push!(Q.args, :(N[$i] = $(basis[i])))
@@ -65,7 +64,7 @@ function create_basis(name, description, X::Vector{<:Vecish{D, T}}, basis, dbasi
 
     V = Expr(:block)
     for i=1:N
-        push!(V.args, :(dN[$i] = Vec{$D}($(dbasis[:, i]...))))
+        push!(V.args, :(dN[$i] = Vec($(dbasis[:, i]...))))
     end
 
     if D == 1
@@ -97,22 +96,22 @@ function create_basis(name, description, X::Vector{<:Vecish{D, T}}, basis, dbasi
             return $X
         end
 
-        function FEMBasis.eval_basis!(::Type{$name}, N::Vector{<:Number}, xi::Vec{$D})
+        @inline function FEMBasis.eval_basis!(::Type{$name}, N::Vector{<:Number}, xi::Vec)
             @assert length(N) == $N
             $unpack
-            $Q
+            @inbounds $Q
             return N
         end
 
-        function FEMBasis.eval_dbasis!(::Type{$name}, dN::Vector{<:Vec{$D}}, xi::Vec{$D})
+        @inline function FEMBasis.eval_dbasis!(::Type{$name}, dN::Vector{<:Vec{$D}}, xi::Vec)
             @assert length(dN) == $N
             $unpack
-            $V
+            @inbounds $V
             return dN
         end
     end
-
-    eval(code)
-    return
+    return code
 end
+
+create_basis_and_eval(args...) = eval(create_basis(args...))
 

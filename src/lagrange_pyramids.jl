@@ -2,7 +2,7 @@
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
 # Kaltenbacher, Manfred. Numerical simulation of mechatronic sensors and actuators: finite elements for computational multiphysics. Springer, 2015.
-code = create_basis(
+code = create_basis_and_eval(
     :Pyr5A,
     "5 node linear pyramid element",
     [
@@ -22,7 +22,7 @@ code = create_basis(
    )
 
 # source: Code Aster documentation?
-code = create_basis(
+code = create_basis_and_eval(
     :Pyr5,
     "5 node linear pyramid element",
     [
