@@ -1,4 +1,10 @@
-[![Build Status](https://travis-ci.org/JuliaFEM/FEMBasis.jl.svg?branch=master)](https://travis-ci.org/JuliaFEM/FEMBasis.jl)[![Coverage Status](https://coveralls.io/repos/github/JuliaFEM/FEMBasis.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaFEM/FEMBasis.jl?branch=master)[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliafem.github.io/FEMBasis.jl/stable)[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://juliafem.github.io/FEMBasis.jl/latest)[![Issues](https://img.shields.io/github/issues/JuliaFEM/FEMBasis.jl.svg)](https://github.com/JuliaFEM/FEMBasis.jl/issues)
+[![][gitter-img]][gitter-url]
+[![][travis-img]][travis-url]
+[![][coveralls-img]][coveralls-url]
+[![][docs-stable-img]][docs-stable-url]
+[![][docs-latest-img]][docs-latest-url]
+[![][issues-img]][issues-url]
+[![][appveyor-img]][appveyor-url]
 
 `FEMBasis.jl` contains interpolation routines for standard finite element
 function spaces.  Given ansatz and coordinates of domain, interpolation
@@ -128,7 +134,7 @@ Basis function can have internal variables if needed, e.g. variable dof basis li
 hierarchical basis functions or NURBS.
 
 It's also possible to do some very common FEM calculations, like calculate Jacobian
-or gradient of some variable with respect to some coordinates. For example, to 
+or gradient of some variable with respect to some coordinates. For example, to
 calculate displacement gradient du/dX in unit square [0,1]^2, one could write:
 
 ```julia
@@ -144,3 +150,23 @@ Result is
  1.5  0.5
  1.0  2.0
 ```
+
+[gitter-img]: https://badges.gitter.im/Join%20Chat.svg
+[gitter-url]: https://gitter.im/JuliaFEM/JuliaFEM.jl
+
+[travis-img]: https://travis-ci.org/JuliaFEM/FEMBasis.jl.svg?branch=master
+[travis-url]: https://travis-ci.org/JuliaFEM/FEMBasis.jl
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://juliafem.github.io/FEMBasis.jl/stable
+[docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
+[docs-latest-url]: https://juliafem.github.io/FEMBasis.jl/latest
+
+[coveralls-img]: https://coveralls.io/repos/github/JuliaFEM/FEMBasis.jl/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/JuliaFEM/FEMBasis.jl?branch=master
+
+[issues-img]: https://img.shields.io/github/issues/JuliaFEM/FEMBasis.jl.svg
+[issues-url]: https://github.com/JuliaFEM/FEMBasis.jl/issues
+
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/l46m623lhaeqec5f/branch/master?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/JuliaFEM/fembasis-jl/branch/master
