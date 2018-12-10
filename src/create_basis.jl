@@ -64,7 +64,7 @@ function create_basis(name, description, X::Vector{<:Vecish{D, T}}, basis, dbasi
 
     V = Expr(:block)
     for i=1:N
-        push!(V.args, :(dN[$i] = Vec($(dbasis[:, i]...))))
+        push!(V.args, :(dN[$i] = Vec(float.(tuple($(dbasis[:, i]...))))))
     end
 
     if D == 1
