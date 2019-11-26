@@ -31,7 +31,8 @@ V = vandermonde_matrix(polynomial, coordinates)
 # References
 - Wikipedia contributors. (2018, August 1). Vandermonde matrix. In Wikipedia, The Free Encyclopedia. Retrieved 10:00, August 20, 2018, from https://en.wikipedia.org/w/index.php?title=Vandermonde_matrix&oldid=852930962
 """
-function vandermonde_matrix(polynomial::Expr, coordinates::NTuple{N, NTuple{D, T}}) where {N, D, T<:Number}
+function vandermonde_matrix(polynomial::Expr, coordinates::Vector{NTuple{D, T}}) where {D, T<:Number}
+    N = length(coordinates)
     A = zeros(N, N)
     first(polynomial.args) == :+ || error("Use only summation between terms of polynomial")
     args = polynomial.args[2:end]

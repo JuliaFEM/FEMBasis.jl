@@ -1,36 +1,6 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-import Base: length, size
-
-function length(B::T) where T<:AbstractBasis
-    return length(T)
-end
-
-function size(B::T) where T<:AbstractBasis
-    return size(T)
-end
-
-function eval_basis!(B::T, N, xi) where T<:AbstractBasis
-    return eval_basis!(T, N, xi)
-end
-
-function eval_dbasis!(B::T, dN, xi) where T<:AbstractBasis
-    return eval_dbasis!(T, dN, xi)
-end
-
-function eval_basis(B, xi)
-    N = zeros(1, length(B))
-    eval_basis!(B, N, xi)
-    return N
-end
-
-function eval_dbasis(B, xi)
-    dN = zeros(size(B)...)
-    eval_dbasis!(B, dN, xi)
-    return dN
-end
-
 """
     interpolate(B, T, xi)
 
@@ -39,19 +9,18 @@ Given basis B, interpolate T at xi.
 # Example
 ```jldoctest
 B = Quad4()
-X = ((0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0))
-T = (1.0, 2.0, 3.0, 4.0)
-interpolate(B, T, (0.0, 0.0))
+X = Vec.([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])
+T = [1.0, 2.0, 3.0, 4.0]
+interpolate(B, T, Vec(0.0, 0.0))
 
 # output
 
 2.5
-
 ```
 """
-function interpolate(B, T, xi)
-    Ti = sum(b*t for (b, t) in zip(eval_basis(B, xi), T))
-    return Ti
+function interpolate(B::AbstractBasis{dim}, T::Vector, xi::Vec{dim}) where {dim}
+    N = eval_basis(B, xi)
+    return sum(b*t for (b, t) in zip(N, T))
 end
 
 """
@@ -62,31 +31,29 @@ Given basis B, calculate jacobian at xi.
 # Example
 ```jldoctest
 B = Quad4()
-X = ([0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])
-jacobian(B, X, (0.0, 0.0))
+X = Vec.([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])
+jacobian(B, X, Vec((0.0, 0.0)))
 
 # output
 
-2×2 Array{Float64,2}:
+2×2 Tensor{2,2,Float64,4}:
  0.5  0.0
  0.0  0.5
 
 ```
 """
-function jacobian(B, X, xi)
-    dB = eval_dbasis(B, xi)
-    dim1, nbasis = size(B)
-    dim2 = length(first(X))
-    J = zeros(dim1, dim2)
-    for i=1:dim1
-        for j=1:dim2
-            for k=1:nbasis
-                J[i,j] += dB[i,k]*X[k][j]
-            end
-        end
+jacobian(B::AbstractBasis{dim}, X::Vector{<:Vec{dim}}, xi::Vec{dim}) where {dim} = jacobian(B, X, xi, eval_dbasis(B, xi))
+
+function jacobian(B::AbstractBasis{dim}, X::Vector{<:Vec{dim}}, xi::Vec{dim}, dB::Vector{<:Vec{dim}}) where {dim}
+    @assert length(X) == length(B) == length(dB)
+    J = zero(Tensor{2, dim})
+    @inbounds for i in 1:length(X)
+        J += otimes(dB[i], X[i]) # dB[i] ⊗ X[i]
     end
     return J
 end
+
+
 
 """
     grad(B, X, xi)
@@ -96,22 +63,29 @@ Given basis B, calculate gradient dB/dX at xi.
 # Example
 ```jldoctest
 B = Quad4()
-X = ([0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])
-grad(B, X, (0.0, 0.0))
+X = Vec.([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])
+grad(B, X, Vec(0.0, 0.0))
 
 # output
 
-2×4 Array{Float64,2}:
- -0.5   0.5  0.5  -0.5
- -0.5  -0.5  0.5   0.5
+4-element Array{Tensor{1,2,Float64,2},1}:
+ [-0.5, -0.5]
+ [0.5, -0.5]
+ [0.5, 0.5]
+ [-0.5, 0.5]
 
 ```
 """
-function grad(B, X, xi)
-    J = jacobian(B, X, xi)
-    dB = eval_dbasis(B, xi)
-    G = inv(J) * dB
-    return G
+grad(B::AbstractBasis{dim}, X::Vector{<:Vec{dim}}, xi::Vec{dim}) where {dim} =
+    grad!(B, similar(X), X, xi, eval_dbasis(B, xi))
+
+function grad!(B::AbstractBasis{dim}, dN::Vector{<:Vec{dim}}, X::Vector{<:Vec{dim}}, xi::Vec{dim}, dB::Vector{<:Vec{dim}}) where {dim}
+    @assert length(dN) == length(dB)
+    J = jacobian(B, X, xi, dB)
+    @inbounds for i in 1:length(dN)
+        dN[i] = inv(J) ⋅ dB[i]
+    end
+    return dN
 end
 
 """
@@ -122,45 +96,46 @@ Calculate gradient of `T` with respect to `X` in point `xi` using basis `B`.
 # Example
 ```jldoctest
 B = Quad4()
-X = ([0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0])
-u = ([0.0, 0.0], [1.0, -1.0], [2.0, 3.0], [0.0, 0.0])
-grad(B, u, X, (0.0, 0.0))
+X = Vec.([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])
+u = Vec.([(0.0, 0.0), (1.0, -1.0), (2.0, 3.0), (0.0, 0.0)])
+grad(B, u, X, Vec(0.0, 0.0))
 
 # output
 
-2×2 Array{Float64,2}:
+julia> grad(B, u, X, Vec(0.0, 0.0))
+2×2 Tensor{2,2,Float64,4}:
  1.5  0.5
  1.0  2.0
 
 ```
 """
-function grad(B, T, X, xi)
-    G = grad(B, X, xi)
-    nbasis = length(B)
-    dTdX = sum(kron(G[:,i], T[i]') for i=1:nbasis)
-    return dTdX'
+function grad(B::AbstractBasis{dim}, T::Vector{<:Vec{dim}}, X::Vector{<:Vec{dim}}, xi::Vec{dim}) where {dim}
+    G = grad(B, X, xi) # <- allocates
+    dTdX = sum(T[i] ⊗ G[i] for i=1:length(B))
+    return dTdX
+end
+function grad(B::AbstractBasis{dim}, T::Vector{<:Number}, X::Vector{<:Vec{dim}}, xi::Vec{dim}) where {dim}
+    G = grad(B, X, xi) # <- allocates
+    dTdX = sum(T[i] * G[i] for i=1:length(B))
+    return dTdX
 end
 
 
 """
 Data type for fast FEM.
 """
-mutable struct BasisInfo{B<:AbstractBasis,T}
-    N::Matrix{T}
-    dN::Matrix{T}
-    grad::Matrix{T}
-    J::Matrix{T}
-    invJ::Matrix{T}
+mutable struct BasisInfo{B<:AbstractBasis,dim, T, M}
+    N::Vector{T}
+    dN::Vector{Vec{dim, T}}
+    grad::Vector{Vec{dim, T}}
+    J::Tensor{2, dim, T, M}
+    invJ::Tensor{2, dim, T, M}
     detJ::T
+    basis::Type{B}
 end
 
-function length(B::BasisInfo{T}) where T<:AbstractBasis
-    return length(T)
-end
-
-function size(B::BasisInfo{T}) where T<:AbstractBasis
-    return size(T)
-end
+Base.length(B::BasisInfo{T}) where T<:AbstractBasis = length(T)
+Base.size(B::BasisInfo{T})   where T<:AbstractBasis = size(T)
 
 """
 Initialization of data type `BasisInfo`.
@@ -178,15 +153,15 @@ FEMBasis.BasisInfo{FEMBasis.Tri3,Float64}([0.0 0.0 0.0], [0.0 0.0 0.0; 0.0 0.0 0
 ```
 
 """
-function BasisInfo(::Type{B}, T=Float64) where B<:AbstractBasis
-    dim, nbasis = size(B)
-    N = zeros(T, 1, nbasis)
-    dN = zeros(T, dim, nbasis)
-    grad = zeros(T, dim, nbasis)
-    J = zeros(T, dim, dim)
-    invJ = zeros(T, dim, dim)
+function BasisInfo(::Type{B}, T=Float64) where B <: AbstractBasis{dim} where dim
+    nbasis = length(B)
+    N = zeros(T, nbasis)
+    dN = zeros(Vec{dim, T}, nbasis)
+    grad = zeros(Vec{dim, T}, nbasis)
+    J = zero(Tensor{2, dim, T})
+    invJ = zero(Tensor{2, dim, T})
     detJ = zero(T)
-    return BasisInfo{B,T}(N, dN, grad, J, invJ, detJ)
+    return BasisInfo(N, dN, grad, J, invJ, detJ, B)
 end
 
 """
@@ -197,73 +172,41 @@ Evaluate basis, gradient and so on for some point `xi`.
 ```jldoctest
 
 b = BasisInfo(Quad4)
-X = ((0.0,0.0), (1.0,0.0), (1.0,1.0), (0.0,1.0))
-xi = (0.0, 0.0)
+X = Vec.([(0.0,0.0), (1.0,0.0), (1.0,1.0), (0.0,1.0)])
+xi = Vec(0.0, 0.0)
 eval_basis!(b, X, xi)
 
 # output
 
-FEMBasis.BasisInfo{FEMBasis.Quad4,Float64}([0.25 0.25 0.25 0.25], [-0.25 0.25 0.25 -0.25; -0.25 -0.25 0.25 0.25], [-0.5 0.5 0.5 -0.5; -0.5 -0.5 0.5 0.5], [0.5 0.0; 0.0 0.5], [2.0 -0.0; -0.0 2.0], 0.25)
+BasisInfo{Quad4,2,Float64,4}([0.25, 0.25, 0.25, 0.25], Tensors.Tensor{1,2,Float64,2}[[-0.25, -0.25], [0.25, -0.25], [0.25, 0.25], [-0.25, 0.25]], Tensors.Tensor{1,2,Float64,2}[[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]], [0.5 0.0; 0.0 0.5], [2.0 -0.0; -0.0 2.0], 0.25, Quad4)
 
 ```
 """
-function eval_basis!(bi::BasisInfo{B}, X, xi) where B
-
+function eval_basis!(bi::BasisInfo{B},
+                     X::Vector{<:Vec{dim}}, xi::Vec{dim}) where B <: AbstractBasis{dim} where dim
     # evaluate basis and derivatives
     eval_basis!(B, bi.N, xi)
     eval_dbasis!(B, bi.dN, xi)
 
-    dim1, nbasis = size(B)
-    dim2 = length(first(X))
-    dims = (dim1, dim2)
-    if size(bi.J) != dims
-        bi.J = zeros(dim1, dim2)
-    else
-        fill!(bi.J, 0.0)
-    end
-
     # calculate Jacobian
-
-    for i=1:dim1
-        for j=1:dim2
-            for k=1:nbasis
-                bi.J[i,j] += bi.dN[i,k]*X[k][j]
-            end
-        end
-    end
+    bi.J = jacobian(B(), X, xi, bi.dN)
 
     # calculate determinant of Jacobian + gradient operator
 
-    if dims == (3, 3)
-        a, b, c, d, e, f, g, h, i = bi.J
-        bi.detJ = a*(e*i-f*h) + b*(f*g-d*i) + c*(d*h-e*g)
-        bi.invJ[1] = 1.0 / bi.detJ * (e*i - f*h)
-        bi.invJ[2] = 1.0 / bi.detJ * (c*h - b*i)
-        bi.invJ[3] = 1.0 / bi.detJ * (b*f - c*e)
-        bi.invJ[4] = 1.0 / bi.detJ * (f*g - d*i)
-        bi.invJ[5] = 1.0 / bi.detJ * (a*i - c*g)
-        bi.invJ[6] = 1.0 / bi.detJ * (c*d - a*f)
-        bi.invJ[7] = 1.0 / bi.detJ * (d*h - e*g)
-        bi.invJ[8] = 1.0 / bi.detJ * (b*g - a*h)
-        bi.invJ[9] = 1.0 / bi.detJ * (a*e - b*d)
-        mul!(bi.grad, bi.invJ, bi.dN)
-    elseif dims == (2, 2)
-        a, b, c, d = bi.J
-        bi.detJ = a*d - b*c
-        bi.invJ[1] = 1.0 / bi.detJ * d
-        bi.invJ[2] = 1.0 / bi.detJ * -b
-        bi.invJ[3] = 1.0 / bi.detJ * -c
-        bi.invJ[4] = 1.0 / bi.detJ * a
-        mul!(bi.grad, bi.invJ, bi.dN)
-    elseif dims == (1, 1)
-        bi.detJ = bi.J[1]
-        bi.invJ[1] = 1.0 / bi.detJ
-        bi.grad = bi.invJ * bi.dN
+    # TODO, fixup curve + manifold
+ #   @assert dim[1] == dim[2]
+    bi.invJ = inv(bi.J)
+    @inbounds for i in 1:length(bi.dN)
+        bi.grad[i] = bi.invJ ⋅ bi.dN[i]
+    end
+    bi.detJ = det(bi.J)
+    #=
     elseif dim1 == 1 # curve
         bi.detJ = norm(bi.J)
     elseif dim1 == 2 # manifold
         bi.detJ = norm(cross(bi.J[1,:], bi.J[2,:]))
     end
+    =#
 
     return bi
 end
@@ -280,38 +223,33 @@ all necessary matrices evaluated with some `X` and `xi`.
 First setup and evaluate basis using `eval_basis!`:
 ```jldoctest ex1
 B = BasisInfo(Quad4)
-X = ((0.0,0.0), (1.0,0.0), (1.0,1.0), (0.0,1.0))
-xi = (0.0, 0.0)
+X = Vec.([(0.0,0.0), (1.0,0.0), (1.0,1.0), (0.0,1.0)])
+xi = Vec(0.0, 0.0)
 eval_basis!(B, X, xi)
 
 # output
 
-FEMBasis.BasisInfo{FEMBasis.Quad4,Float64}([0.25 0.25 0.25 0.25], [-0.25 0.25 0.25 -0.25; -0.25 -0.25 0.25 0.25], [-0.5 0.5 0.5 -0.5; -0.5 -0.5 0.5 0.5], [0.5 0.0; 0.0 0.5], [2.0 -0.0; -0.0 2.0], 0.25)
+BasisInfo{Quad4,2,Float64}([0.25, 0.25, 0.25, 0.25], Tensors.Tensor{1,2,Float64,2}[[-0.25, -0.25], [0.25, -0.25], [0.25, 0.25], [-0.25, 0.25]], Tensors.Tensor{1,2,Float64,2}[[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [-0.5, 0.5]], [0.5 0.0; 0.0 0.5], [2.0 -0.0; -0.0 2.0], 0.25)
 
 ```
 
 Next, calculate gradient of `u`:
 ```jldoctest ex1
-u = ((0.0, 0.0), (1.0, -1.0), (2.0, 3.0), (0.0, 0.0))
-gradu = zeros(2, 2)
-grad!(B, gradu, u)
+u = Vec.([(0.0, 0.0), (1.0, -1.0), (2.0, 3.0), (0.0, 0.0)])
+grad(B, u)
 
 # output
 
-2×2 Array{Float64,2}:
+2×2 Tensors.Tensor{2,2,Float64,4}:
  1.5  0.5
  1.0  2.0
+
 ```
 """
-function grad!(bi::BasisInfo{B}, gradu, u) where B
-    dim, nbasis = size(B)
-    fill!(gradu, 0.0)
-    for i=1:dim
-        for j=1:dim
-            for k=1:nbasis
-                gradu[i,j] += bi.grad[j,k]*u[k][i]
-            end
-        end
+function grad(bi::BasisInfo{B}, u::Vector{<:Vec{dim}}) where B <: AbstractBasis{dim} where dim
+    gradu = zero(Tensor{2, dim})
+    for k in 1:length(B)
+        gradu += otimes(u[k], bi.grad[k])
     end
     return gradu
 end
