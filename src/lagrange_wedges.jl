@@ -2,33 +2,32 @@
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
 # Kaltenbacher, Manfred. Numerical simulation of mechatronic sensors and actuators: finite elements for computational multiphysics. Springer, 2015.
-code = create_basis(
+create_basis_and_eval(
     :Wedge6,
     "6 node linear prismatic/wedge element",
-    (
+    [
      (0.0, 0.0, -1.0), # N1
      (1.0, 0.0, -1.0), # N2
      (0.0, 1.0, -1.0), # N3
      (0.0, 0.0,  1.0), # N4
      (1.0, 0.0,  1.0), # N5
      (0.0, 1.0,  1.0), # N6
-    ),
-    (
+    ],
+    [
      :(1/2 * (1-w) * (1-u-v)), # N1
      :(1/2 * (1-w) * u), # N2
      :(1/2 * (1-w) * v), # N3
      :(1/2 * (1+w) * (1-u-v)), # N4
      :(1/2 * (1+w) * u), # N5
      :(1/2 * (1+w) * v), # N6
-    ),
+    ],
    )
-eval(code)
 
 # Basis functions are from ABAQUS theory manual
-code = create_basis(
+create_basis_and_eval(
     :Wedge15,
     "15 node quadratic prismatic/wedge element",
-    (
+    [
      (0.0, 0.0, -1.0), # N1
      (1.0, 0.0, -1.0), # N2
      (0.0, 1.0, -1.0), # N3
@@ -44,8 +43,8 @@ code = create_basis(
      (0.0, 0.0,  0.0), # N13
      (1.0, 0.0,  0.0), # N14
      (0.0, 1.0,  0.0), # N15
-    ),
-    (
+    ],
+    [
      :(u^2*w^2 - u^2*w + 2*u*v*w^2 - 2*u*v*w - 3*u*w^2/2 + 3*u*w/2 + v^2*w^2 - v^2*w - 3*v*w^2/2 + 3*v*w/2 + w^2/2 - w/2),
      :(u^2*w^2 - u^2*w - u*w^2/2 + u*w/2),
      :(v^2*w^2 - v^2*w - v*w^2/2 + v*w/2),
@@ -61,6 +60,5 @@ code = create_basis(
      :(-2*u^2*w^2 + 2*u^2 - 4*u*v*w^2 + 4*u*v + 3*u*w^2 - 3*u - 2*v^2*w^2 + 2*v^2 + 3*v*w^2 - 3*v - w^2 + 1),
      :(-2*u^2*w^2 + 2*u^2 + u*w^2 - u),
      :(-2*v^2*w^2 + 2*v^2 + v*w^2 - v),
-    ),
+    ],
    )
-eval(code)

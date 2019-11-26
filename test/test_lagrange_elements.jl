@@ -7,11 +7,11 @@ using Test
 function test_elements(elements::Symbol...)
     for i in 1:length(elements)
         element = getfield(FEMBasis, elements[i])
-        N = zeros(1,size(element, 2))
+        N = zeros(size(element, 2))
         X = get_reference_element_coordinates(element)
         for i=1:length(element)
             eval_basis!(element, N, X[i])
-            N_expected = zeros(1, length(element))
+            N_expected = zeros(length(element))
             N_expected[i] = 1.0
             @test isapprox(N, N_expected)
         end

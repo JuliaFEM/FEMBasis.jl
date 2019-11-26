@@ -1,8 +1,6 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-using Calculus
-
 function subs(p::Number, ::Any)
     return p
 end
@@ -52,5 +50,5 @@ function subs(p::Expr, data::NTuple{N,Pair{Symbol, T}}) where {N, T}
     for di in data
         p = subs(p, di)
     end
-    return simplify(p)
+    return Calculus.simplify(p)
 end

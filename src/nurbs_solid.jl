@@ -1,7 +1,7 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
-mutable struct NSolid <: AbstractBasis
+mutable struct NSolid <: AbstractBasis{3}
     order_u :: Int
     order_v :: Int
     order_w :: Int
@@ -30,7 +30,7 @@ function size(basis::NSolid)
     return (3, length(basis))
 end
 
-function eval_basis!(basis::NSolid, N::Matrix, xi)
+function eval_basis!(basis::NSolid, N::Vector, xi::Vec{3})
     pu = basis.order_u
     pv = basis.order_v
     pw = basis.order_w
