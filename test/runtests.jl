@@ -4,8 +4,6 @@
 using FEMBasis
 using Test
 
-include("../docs/make.jl")
-
 @testset "FEMBasis.jl" begin
     @testset "test substitution" begin include("test_substitute.jl") end
     @testset "create Vandermonde matrix" begin include("test_vandermonde.jl") end
@@ -15,5 +13,3 @@ include("../docs/make.jl")
     @testset "test_nurbs_elements" begin include("test_nurbs_elements.jl") end
     @testset "test_math" begin include("test_math.jl") end
 end
-
-include("../docs/deploy.jl")
