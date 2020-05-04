@@ -14,7 +14,7 @@ polynomial `p(u,v) = 1 + u + v + u*v`, one writes:
 
 ```julia
 polynomial = :(1 + u + v + u*v)
-coordinates = ((-1.0,-1.0), (1.0,-1.0), (1.0,1.0), (-1.0,1.0))
+coordinates = [(-1.0,-1.0), (1.0,-1.0), (1.0,1.0), (-1.0,1.0)]
 V = vandermonde_matrix(polynomial, coordinates)
 
 # output
