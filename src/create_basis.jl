@@ -1,6 +1,8 @@
 # This file is a part of JuliaFEM.
 # License is MIT: see https://github.com/JuliaFEM/FEMBasis.jl/blob/master/LICENSE
 
+__precompile__(false)
+
 function get_reference_element_coordinates end
 function eval_basis! end
 function eval_dbasis! end
