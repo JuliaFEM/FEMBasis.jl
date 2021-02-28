@@ -10,7 +10,7 @@ Tensors = "48a634ad-e948-5137-8d70-aa71f2a747f4"
 
 [compat]
 julia = "1"
-Calculus = "0.5"
+Calculus = "0.5.1"
 Tensors = "1"
 
 [extras]
